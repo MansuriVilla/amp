@@ -1,14 +1,23 @@
-.item {
+.projects_section{
+    overflow: hidden;
+    min-height: 100vh;
+}
+.slide-item {
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex: 1;
+    flex: 0 0 60vw;
+    background-color: red;
   }
   .item_bg {
     width: 100%;
     height: 100%;
     display: flex;
+    overflow: hidden;
+  }
+  .item_bg img {
+    width: 100%;
   }
   .item_content {
     position: absolute;
@@ -17,4 +26,8 @@
     gap: 20px;
     justify-content: center;
   align-items: center;
+  }
+  
+  .slider_items {
+    justify-content: flex-start;
   }

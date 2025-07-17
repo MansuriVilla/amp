@@ -5,6 +5,7 @@ import { gsap } from "gsap";
     
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Footer from './components/footer/Footer';
+import VideoBanner from './components/video-banner/VideoBanner.jsx';
 import ProjectsSection from './components/projects/ProjectsSection';
 
 
@@ -33,8 +34,8 @@ function App() {
 
   return (
     <>
-    <main className="site_flex flex_column site_gap"> 
-
+    <main className="main_content site_flex flex_column site_gap"> 
+    <VideoBanner />
     <ProjectsSection />
      <Footer />
     </main>
