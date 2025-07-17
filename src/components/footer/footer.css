@@ -1,4 +1,4 @@
 
 .footer_right-bottom.site_gap {
-    gap: calc(var(--space) - 280px);
+    gap: 20px;
 }

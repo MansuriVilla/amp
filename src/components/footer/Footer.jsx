@@ -1,5 +1,5 @@
-import ampLogo from "/amp-footer-logo.svg";
-import linkIcon from "/anchor-ico.svg";
+import ampLogo from "/assets/images/amp-footer-logo.svg";
+import linkIcon from "/assets/images/anchor-ico.svg";
 import "./footer.css";
 
 function Footer() {
@@ -25,6 +25,7 @@ function Footer() {
           <div className="footer_right">
             <div className="footer_right-inner">
               <div className="footer_right-top">
+
                 <h2>Not Big on Social. Big on Real.</h2>
               </div>
               <div className="footer_right-bottom site_flex flex_column site_gap">
