@@ -5,6 +5,7 @@ import { gsap } from "gsap";
     
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Footer from './components/footer/Footer';
+import ProjectsSection from './components/projects/ProjectsSection';
 
 
 import './App.css'
@@ -34,6 +35,7 @@ function App() {
     <>
     <main className="site_flex flex_column site_gap"> 
 
+    <ProjectsSection />
      <Footer />
     </main>
     </>

@@ -1,0 +1,14 @@
+[
+{
+    "id":1,
+    "image_bg":"https://images.unsplash.com/photo-1614949194403-9602bdc14a3a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Zm9ybXVsYSUyMDF8ZW58MHx8MHx8fDA%3D",
+    "logo":"/assets/images/amp-footer-logo.svg",
+    "button_text":"Hello World"
+},
+{
+    "id":2,
+    "image_bg":"/assets/images/amp-footer-logo.svg",
+    "logo":"/assets/images/anchor-ico.svg",
+    "button_text":"Hello World"
+}
+]

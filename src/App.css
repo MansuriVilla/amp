@@ -1,6 +1,6 @@
 
 :root{
-    --space:300px;
+    --space:50px;
     --text-black:"#000";
 }
 
@@ -63,3 +63,5 @@
  -----------*/
 
  .gray{color:var(--text-black) ; opacity: 0.2;}
+
+ .section_name{text-transform: capitalize; font-size: 20px; color: var(--text-black);}
