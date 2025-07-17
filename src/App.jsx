@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Footer from './components/footer/Footer';
 import VideoBanner from './components/video-banner/VideoBanner.jsx';
+import AboutUs from './components/about-us/AboutUs.jsx';
 
 
 import './App.css'
@@ -35,6 +36,7 @@ function App() {
     <>
     <main className="site_flex flex_column site_gap"> 
     <VideoBanner />
+    <AboutUs/>
      <Footer />
     </main>
     </>
