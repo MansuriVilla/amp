@@ -1,1 +1,28 @@
+
+:root{
+    --space:300px;
+    --text-black:"#000";
+}
+
 *{margin: 0; padding: 0; box-sizing: border-box;}
+.site_container{max-width: 1440px; margin: 0 auto;}
+
+
+  
+
+
+/*-----------------
+  FLEX CLASSES
+  ----------*/
+
+.site_flex{display: flex;}
+.flex_column{flex-direction: column; -ms-flex-direction: column;}
+.site_gap{gap: var(--space);}
+
+
+
+/*----------------
+ TEXTS/FONTS STYLES
+ -----------*/
+
+ .gray{color:var(--text-black) ; opacity: 0.2;}
