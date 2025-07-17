@@ -9,9 +9,11 @@ function Footer() {
         <div className="site_flex space_between">
           <div className="footer_left">
             <div className="footer_left-inner site_flex flex_column">
-              <img src={ampLogo} alt="AMP Media Logo" />
+              <div className="footer_logo">
+                <img src={ampLogo} alt="AMP Media Logo" />
+              </div>
               <div className="footer_email">
-                <p>Talk to us</p>
+                <h3>Talk to us</h3>
                 <a href="mailto:info@theampmedia.com">
                   <span className="anchor_hover">info@theampmedia.com</span>
                   <span>
