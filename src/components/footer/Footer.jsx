@@ -6,7 +6,7 @@ function Footer() {
   return (
     <footer id="site_footer">
       <div className="site_container">
-        <div className="site_flex">
+        <div className="site_flex space_between">
           <div className="footer_left">
             <div className="footer_left-inner site_flex flex_column">
               <img src={ampLogo} alt="AMP Media Logo" />
@@ -24,9 +24,10 @@ function Footer() {
           </div>
           <div className="footer_right">
             <div className="footer_right-inner">
-              <div className="footer_right-top"></div>
-              <div className="footer_right-bottom">
+              <div className="footer_right-top">
                 <h2>Not Big on Social. Big on Real.</h2>
+              </div>
+              <div className="footer_right-bottom site_flex flex_column site_gap">
                 <p>
                   We’re a little too shy (or just too busy building cool things)
                   to post every day.
