@@ -1,0 +1,19 @@
+.about_us_main_content{
+    max-width: 800px;
+}
+.about_us_content-top{
+    margin-bottom: 10px;
+}
+.about_us_content-top h1{
+    margin-bottom: 10px;
+}
+.about_us_content_bottom .text_underline{
+    position: relative;
+}
+.about_us_content_bottom h2 .text_underline::after{
+     content: ""; position: absolute; width: 100%; height: 2px; background-color: var(--hover-clr, #000); border-radius: 40px; transform: scaleX(1); left: 0px; bottom: 7px; transform-origin: left; transition: transform 0.5s ease; 
+}
+
+.about_us_content_bottom h2 .light_text{
+    font-weight: 400;
+}
