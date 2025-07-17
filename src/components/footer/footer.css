@@ -1,1 +1,4 @@
-#site_footer{background-color: red;}
+
+.footer_right-bottom.site_gap {
+    gap: 20px;
+}
