@@ -8,6 +8,8 @@ import Footer from './components/footer/Footer';
 import VideoBanner from './components/video-banner/VideoBanner.jsx';
 import AboutUs from './components/about-us/AboutUs.jsx';
 import ProjectsSection from './components/projects/ProjectsSection';
+import WorkSpace from './components/workspace/WorkSpace.jsx';
+import Review from './components/review/Review.jsx';
 
 
 import './App.css'
@@ -39,6 +41,8 @@ function App() {
     <VideoBanner />
     <AboutUs/>
     <ProjectsSection />
+    <WorkSpace />
+    <Review />
      <Footer />
     </main>
     </>

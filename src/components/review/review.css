@@ -1,0 +1,11 @@
+.review_client-details {
+    align-items: center;
+    gap: 10px;
+  }
+  .review_row.site_gap {
+    gap: 15px;
+  }
+
+  .review-client_name{font-style:italic ;}
+  .client_at{font-style: italic; opacity: .5;}
+  

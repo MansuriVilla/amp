@@ -1,8 +1,7 @@
 @font-face {
   font-family: 'Switzer';
   src: url('./assets/fonts/Switzer-Regular.woff2') format('woff2'),
-       url('./assets/fonts/Switzer-Regular.woff') format('woff'),
-       url('./assets/fonts/Switzer-Regular.ttf') format('truetype');
+       url('./assets/fonts/Switzer-Regular.woff') format('woff');
   font-weight: 400;
   font-display: swap;
   font-style: normal;
@@ -11,8 +10,7 @@
 @font-face {
   font-family: 'Switzer';
   src: url('./assets/fonts/Switzer-Italic.woff2') format('woff2'),
-       url('./assets/fonts/Switzer-Italic.woff') format('woff'),
-       url('./assets/fonts/Switzer-Italic.ttf') format('truetype');
+       url('./assets/fonts/Switzer-Italic.woff') format('woff');
   font-weight: 400;
   font-display: swap;
   font-style: italic;
@@ -20,8 +18,7 @@
 @font-face {
   font-family: 'Switzer';
   src: url('./assets/fonts/Switzer-Semibold.woff2') format('woff2'),
-       url('./assets/fonts/Switzer-Semibold.woff') format('woff'),
-       url('./assets/fonts/Switzer-Semibold.ttf') format('truetype');
+       url('./assets/fonts/Switzer-Semibold.woff') format('woff');
   font-weight: 600;
   font-display: swap;
   font-style: normal;
@@ -29,11 +26,18 @@
 @font-face {
   font-family: 'Switzer';
   src: url('./assets/fonts/Switzer-Bold.woff2') format('woff2'),
-       url('./assets/fonts/Switzer-Bold.woff') format('woff'),
-       url('./assets/fonts/Switzer-Bold.ttf') format('truetype');
+       url('./assets/fonts/Switzer-Bold.woff') format('woff');
   font-weight: 700;
   font-display: swap;
   font-style: normal;
+}
+@font-face {
+  font-family: 'Switzer-Italic';
+  src: url('./assets/fonts/Switzer-Italic.woff2') format('woff2'),
+       url('./assets/fonts/Switzer-Italic.woff') format('woff');
+  font-weight: 400;
+  font-display: swap;
+  font-style: italic;
 }
 
 :root{
@@ -42,7 +46,7 @@
 }
 
 *{margin: 0; padding: 0; box-sizing: border-box;}
-.site_container{max-width: 1440px; margin: 0 auto;}
+.site_container{max-width: 1440px;  width: 100%; margin: 0 auto;}
 
 
 body{font-family: 'Switzer';font-size: 24px;font-weight: 400;color: var(--black);}
@@ -60,8 +64,8 @@ a {text-decoration: none;display: inline-block;color: var(--text-black);}
 img {max-width: 100%;height: auto;display: flex;}
 
 h1{font-size: clamp(30px, 4vw, 48px);font-weight: 700;}
-h2{font-size: clamp(30px, 4vw, 48px);font-weight: 700;}
-h2.light{font-weight: 400;}
+h2,.h2{font-size: clamp(30px, 4vw, 48px);font-weight: 700;}
+h2.light,.h2.light{font-weight: 400;}
 h3{font-size: clamp(26px, 3vw, 36px);font-weight: 600;}
 h4{font-size: clamp(20px, 2vw, 24px);font-weight: 600;}
 p{font-size: clamp(16px, 2vw, 20px);font-weight: 400;}
@@ -91,9 +95,8 @@ p{font-size: clamp(16px, 2vw, 20px);font-weight: 400;}
 
 .anchor_hover { position: relative; --hover-clr: var(--hover-clr);}
 .anchor_hover::after { content: ""; position: absolute; width: 100%; height: 1px; background-color: var(--hover-clr, #000); border-radius: 40px; transform: scaleX(1); left: 0px; bottom: 0px; transform-origin: left; transition: transform 0.5s ease; }
-.anchor_hover:hover::after { transform-origin: right; transform: scaleX(0); }.anchor_hover { position: relative; --hover-clr: var(--hover-clr);}
-.anchor_hover::after { content: ""; position: absolute; width: 100%; height: 1px; background-color: var(--hover-clr, #000); border-radius: 40px; transform: scaleX(1); left: 0px; bottom: 0px; transform-origin: left; transition: transform 0.5s ease; }
 .anchor_hover:hover::after { transform-origin: right; transform: scaleX(0); }
+
 
 
 
@@ -102,7 +105,7 @@ p{font-size: clamp(16px, 2vw, 20px);font-weight: 400;}
   font-weight: 600;
   margin-bottom: 10px;
 }
- .section_name{text-transform: capitalize; font-size: 20px; color: var(--text-black);}
+ .section_name{text-transform: capitalize; font-size: 20px; color: var(--text-black); font-weight: 600;}
 
 
 

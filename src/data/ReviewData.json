@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "text": "“AMP felt like part of our team from day one. Sharp, fast, and fun to work with.”",
+        "name": "Michael",
+        "companyName": "- Product Manager at <a href='https://blueteesgolf.com' target='blank' class='anchor_hover'>BlueteesGolf</a>"
+    },
+    {
+        "id": 2,
+        "text": "“These guys just get it. Super easy to work with and the results speak for themselves.”",
+        "name": "Evan",
+        "companyName": "-  CEO & Founder at <a href='https://customesignature.com/' target='blank' class='anchor_hover'>Customesignature</a>"
+    },
+    {
+        "id": 3,
+        "text": "“Zero hand-holding needed. They just deliver — every time”",
+        "name": "Kevin",
+        "companyName": "-  Co Founder at <a href='https://remotecleanacademy.com/' target='blank'  class='anchor_hover'>RCA</a>"
+    }
+]
