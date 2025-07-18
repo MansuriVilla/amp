@@ -41,7 +41,7 @@ function ProjectsSection() {
           pinSpacing: true,
           scrub: true,
           invalidateOnRefresh: true,
-          markers: true, // Uncomment for debugging horizontal scroll
+          // markers: true, // Uncomment for debugging horizontal scroll
         },
       });
     }
@@ -80,7 +80,7 @@ function ProjectsSection() {
             containerAnimation: mainScrollTrigger.current,
             toggleActions: "play none none reverse",
             scrub: true,
-            // markers: true,
+            markers: true,
           },
         });
       }
