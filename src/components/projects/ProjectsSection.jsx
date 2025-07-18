@@ -80,7 +80,7 @@ function ProjectsSection() {
             containerAnimation: mainScrollTrigger.current,
             toggleActions: "play none none reverse",
             scrub: true,
-            markers: true,
+            // markers: true
           },
         });
       }
