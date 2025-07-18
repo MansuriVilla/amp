@@ -34,6 +34,7 @@
   }
   .item_bg img {
     width: 100%;
+    object-fit: cover;
   }
   .item_content {
     position: absolute;
