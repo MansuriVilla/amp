@@ -4,7 +4,7 @@
         "cardImage": "/assets/images/image1.webp",
         "cardLable": "For Brands",
         "cardTitle": "Start smart. Build bold.",
-        "cardLinkText": "<a href='mailto:demo@ampmedia.com' target='blank' style='--hover-clr:#fff' class='anchor_hover'>Start Your Project</a>"
+        "cardLinkText": "<a href='mailto:info@theampmedia.com' target='blank' style='--hover-clr:#fff' class='anchor_hover'>Start Your Project</a>"
 
     },
     {
@@ -12,7 +12,7 @@
         "cardImage": "/assets/images/image2.webp",
         "cardLable": "For Creatives",
         "cardTitle": "Not just a job. A vibe.",
-        "cardLinkText": "<a href='mailto:demo@ampmedia.com' target='blank' style='--hover-clr:#fff' class='anchor_hover'>Join the Crew</a>"
+        "cardLinkText": "<a href='mailto:info@theampmedia.com' target='blank' style='--hover-clr:#fff' class='anchor_hover'>Join the Crew</a>"
 
     }
 ]
