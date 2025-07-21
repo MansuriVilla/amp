@@ -101,7 +101,7 @@ function ProjectsSection() {
   };
 
   return (
-    <section className="projects_section"> {/* No ref={sectionRef} here for pinning */}
+    <section className="projects_section" ref={projectSectionBottomRef}> 
       <div className="projects_section-inner site_flex flex_column site_gap">
         <div className="project_section-top">
           <div className="site_container">
@@ -113,8 +113,8 @@ function ProjectsSection() {
             </p>
           </div>
         </div>
-        {/* Add ref to the specific div you want to pin */}
-        <div className="project_section-bottom" ref={projectSectionBottomRef}>
+        
+        <div className="project_section-bottom" >
           <div className="scroll_slider">
             <div className="slider_items site_flex site_gap" ref={sliderRef}>
               {ProjectData.map((data, index) => (
@@ -124,6 +124,7 @@ function ProjectsSection() {
                       src={data.image_bg}
                       alt={data.image_bg}
                       ref={(el) => setItemRef(el, index)}
+                      decoding="async"
                     />
                   </div>
                   <div className="item_content">

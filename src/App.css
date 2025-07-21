@@ -69,6 +69,7 @@ h2.light,.h2.light{font-weight: 400;}
 h3{font-size: clamp(26px, 3vw, 36px);font-weight: 600;}
 h4{font-size: clamp(20px, 2vw, 24px);font-weight: 600;}
 p{font-size: clamp(16px, 2vw, 20px);font-weight: 400;}
+ /* canvas{height: 100% !important; width: 1000% !important;} */
 
 
 /*-----------------

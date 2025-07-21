@@ -13,48 +13,6 @@ function WorkSpace() {
   const mainScrollTrigger = useRef(null); // New ref to store the main ScrollTrigger
 
   useEffect(() => {
-    const slider = sliderRef.current;
-    const section = sectionRef.current;
-
-    // if (slider && section) {
-    //   const totalContentWidth = slider.scrollWidth;
-    //   const visibleContainerWidth = slider.clientWidth;
-    //   const scrollableDistance = totalContentWidth - visibleContainerWidth;
-
-    //   const startXPercent = 5;
-
-    //   gsap.set(slider, { x: (totalContentWidth * startXPercent) / 100 });
-
-    //   // Store the created ScrollTrigger instance in the ref
-    //   mainScrollTrigger.current = gsap.to(slider, {
-    //     x: -scrollableDistance,
-    //     ease: "none",
-    //     scrollTrigger: {
-    //       trigger: section,
-    //       start: "top top",
-    //       end: () =>
-    //         "+=" +
-    //         (scrollableDistance + (totalContentWidth * startXPercent) / 100),
-    //       pin: true,
-    //       pinSpacing: true,
-    //       scrub: 1,
-    //       invalidateOnRefresh: true,
-    //       // markers: true, // Uncomment for debugging horizontal scroll
-    //     },
-    //   });
-    // }
-
-    // return () => {
-    //   // Clean up the main ScrollTrigger
-    //   if (mainScrollTrigger.current) {
-    //     mainScrollTrigger.current.kill();
-    //     mainScrollTrigger.current = null;
-    //   }
-    //   ScrollTrigger.getAll().forEach((trigger) => trigger.kill()); // This can still be useful for other triggers
-    // };
-  }, []);
-
-  useEffect(() => {
     // Only set up CTA animations if the main horizontal scroll trigger exists
     if (!mainScrollTrigger.current) {
       return; // Exit if the main trigger isn't ready yet
@@ -97,6 +55,73 @@ function WorkSpace() {
   }, [mainScrollTrigger.current]); // Re-run this effect when mainScrollTrigger.current changes (i.e., when it's set)
 
 
+  useEffect(() => {
+    function slideInView() {
+      const container = document.querySelector(
+        ".slide_in-view__container .slide_in-view__row"
+      );
+      const imagesContainer = document.querySelector(".slide_in-view__images");
+      const images = imagesContainer.querySelectorAll(".slide_in-view__image");
+
+      if (!container || !imagesContainer || images.length === 0) {
+        console.warn("Slide-in view elements not found");
+        return;
+      }
+
+      // Calculate total width of original images dynamically
+      let originalImagesWidth = 0;
+      images.forEach((img) => {
+        const style = window.getComputedStyle(img);
+        const marginLeft = parseFloat(style.marginLeft);
+        const marginRight = parseFloat(style.marginRight);
+        originalImagesWidth += img.offsetWidth + marginLeft + marginRight;
+      });
+
+      // Clone images
+      images.forEach((img) => {
+        const clone = img.cloneNode(true);
+        imagesContainer.appendChild(clone);
+      });
+
+      let initSlides = false;
+
+      ScrollTrigger.create({
+        trigger: container,
+        start: "10% 83%",
+        end: "10% top",
+        // markers: true,
+        onEnter: () => {
+          if (initSlides) return;
+          initSlides = true;
+
+          gsap.set(".slide_in-view__images .slide_in-view__image", {
+            opacity: 0,
+            x: "100%",
+          });
+
+          gsap.to(".slide_in-view__images .slide_in-view__image", {
+            opacity: 1,
+            x: "0%",
+            duration: 1.6,
+            stagger: 0.1,
+            ease: "power4.out",
+          });
+
+          gsap.to(imagesContainer, {
+            x: -originalImagesWidth,
+            ease: "none",
+            duration: 80,
+            repeat: -1,
+          });
+        },
+      });
+
+      ScrollTrigger.refresh();
+    }
+    slideInView();
+  }, []);
+
+
   const setItemRef = (el, index) => {
     itemsRef.current[index] = el;
   };
@@ -113,16 +138,18 @@ function WorkSpace() {
             </p>
           </div>
         </div>
-        <div className="wrokSpace_section-bottom">
-          <div className="scroll_slider">
-            <div className="slider_items work-space_items site_flex site_gap" ref={sliderRef}>
+        <div className="wrokSpace_section-bottom slide_in-view__container">
+          <div className="scroll_slider   slide_in-view__row">
+            <div className="slider_items slide_in-view__images work-space_items site_flex site_gap" ref={sliderRef}>
               {WorkSpaceData.map((data, index) => (
-                <div className="work-space--slide-item" key={data.id}>
+                <div className="work-space--slide-item slide_in-view__image" key={data.id}>
                   <div className="item_bg">
                     <img
+                    
                       src={data.image_bg}
                       alt={data.image_bg}
                       ref={(el) => setItemRef(el, index)}
+                      decoding="async"
                     />
                   </div>
                 </div>

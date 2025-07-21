@@ -1,0 +1,18 @@
+[
+    {
+        "id":1,
+        "cardImage": "/assets/images/image1.webp",
+        "cardLable": "For Brands",
+        "cardTitle": "Start smart. Build bold.",
+        "cardLinkText": "<a href='https://customesignature.com/' target='blank' class='anchor_hover'>Start Your Project</a>"
+
+    },
+    {
+        "id":2,
+        "cardImage": "/assets/images/image2.webp",
+        "cardLable": "For Creatives",
+        "cardTitle": "Not just a job. A vibe.",
+        "cardLinkText": "<a href='https://customesignature.com/' target='blank' class='anchor_hover'>Join the Crew</a>"
+
+    }
+]

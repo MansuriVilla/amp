@@ -10,6 +10,7 @@ import AboutUs from './components/about-us/AboutUs.jsx';
 import ProjectsSection from './components/projects/ProjectsSection';
 import WorkSpace from './components/workspace/WorkSpace.jsx';
 import Review from './components/review/Review.jsx';
+import Contact from './components/contact/Contact.jsx';
 
 
 import './App.css'
@@ -43,6 +44,7 @@ function App() {
     <ProjectsSection />
     <WorkSpace />
     <Review />
+    <Contact />
      <Footer />
     </main>
     </>

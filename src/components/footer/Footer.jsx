@@ -15,7 +15,7 @@ function Footer() {
             <div className="footer_left-inner site_flex flex_column">
               <div className="footer_logo">
                 <a href="">
-                  <img src={ampLogo} alt="AMP Media Logo" />
+                  <img src={ampLogo} alt="AMP Media Logo" decoding="async" />
                 </a>
               </div>
               <div className="footer_email">

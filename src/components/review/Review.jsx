@@ -1,8 +1,6 @@
-import { useEffect, useRef } from "react";
 import ReviewData from "../../data/ReviewData.json";
 import "./review.css";
-// import { gsap } from "gsap"; // Not used in this snippet, can be removed if not needed elsewhere
-// import { ScrollTrigger } from "gsap/ScrollTrigger"; // Not used in this snippet, can be removed if not needed elsewhere
+
 
 function Review() {
   return (
