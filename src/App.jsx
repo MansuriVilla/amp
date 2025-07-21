@@ -22,7 +22,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function App() { 
   
-  useZoomInText({ selector: "span, h2" });
+  useZoomInText({ selector: "span, h2, p" });
   useEffect(() => {
     const lenis = new Lenis();
 
@@ -44,7 +44,7 @@ function App() {
   return (
     <>
     <main className="main_content site_flex flex_column site_gap"> 
-    <SplittingText />
+    {/* <SplittingText /> */}
     <VideoBanner />
     <AboutUs/>
     <ProjectsSection />

@@ -1,2 +1,2 @@
 
-.hero_banner video{height: 100vh;width: 100%; object-fit: cover; object-position: bottom;}
+.hero_banner video{height: 100vh;width: 100%; object-fit: cover; object-position: bottom; max-height: 800px;}
