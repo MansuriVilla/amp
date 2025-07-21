@@ -95,7 +95,7 @@ p{font-size: clamp(16px, 2vw, 20px);font-weight: 400;}
   ---------*/
 
 .anchor_hover { position: relative; --hover-clr: var(--hover-clr);}
-.anchor_hover::after { content: ""; position: absolute; width: 100%; height: 1px; background-color: var(--hover-clr, #000); border-radius: 40px; transform: scaleX(1); left: 0px; bottom: 0px; transform-origin: left; transition: transform 0.5s ease; }
+.anchor_hover::after { content: ""; position: absolute; width: 100%; height: 1px; background-color: var(--hover-clr, #000); border-radius: 40px; transform: scaleX(1); left: 0px; bottom: -1px; transform-origin: left; transition: transform 0.5s ease; }
 .anchor_hover:hover::after { transform-origin: right; transform: scaleX(0); }
 
 
