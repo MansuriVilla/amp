@@ -3,7 +3,6 @@ import contactData from "../../data/contactData.json";
 import "./contact.css";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-// Make sure the path below is correct for your project structure
 import { useImageDistortion } from '../../utils/Shaders'; 
 
 gsap.registerPlugin(ScrollTrigger);
