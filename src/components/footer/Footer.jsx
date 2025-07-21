@@ -1,9 +1,7 @@
 import ampLogo from "/assets/images/amp-footer-logo.svg";
 import linkIcon from "/assets/images/anchor-ico.svg";
-import facebook from "/assets/images/facebook.svg";
-import twitter from "/assets/images/twitter.svg";
-import instagram from "/assets/images/instagram.svg";
-import youtube from "/assets/images/youtube.svg";
+import socialHandls from "/assets/images/social-handels.svg";
+
 import "./footer.css";
 
 function Footer() {
@@ -27,28 +25,20 @@ function Footer() {
                   </span>
                 </a>
               </div>
-              <p className="copyright_text">© 2025 AMPV Media Pvt. Ltd. All rights reserved.</p>
+              <p className="copyright_text">
+                © 2025 AMPV Media Pvt. Ltd. All rights reserved.
+              </p>
             </div>
           </div>
           <div className="footer_right">
             <div className="footer_right-inner">
               <div className="socical-media">
-                <a href="#">
-                  <img src={facebook} alt="" />
-                </a>
-                <a href="#">
-                  <img src={twitter} alt="" />
-                </a>
-                <a href="#">
-                  <img src={instagram} alt="" />
-                </a>
-                <a href="#">
-                  <img src={youtube} alt="" />
-                </a>
+                <img src={socialHandls} alt="" />
               </div>
               <div className="footer_right-top">
-
-                <h2><span className="gray">Not Big on Social.</span> Big on Real.</h2>
+                <h2>
+                  <span className="gray">Not Big on Social.</span> Big on Real.
+                </h2>
               </div>
               <div className="footer_right-bottom site_flex flex_column site_gap">
                 <p>
