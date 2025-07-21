@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 
 import Lenis from 'lenis'
 import { gsap } from "gsap";
+
     
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Footer from './components/footer/Footer';
@@ -11,13 +12,17 @@ import ProjectsSection from './components/projects/ProjectsSection';
 import WorkSpace from './components/workspace/WorkSpace.jsx';
 import Review from './components/review/Review.jsx';
 import Contact from './components/contact/Contact.jsx';
+import { SplittingText } from "./utils/SplittingText.jsx";
+import { useZoomInText } from "./utils/ZoomInText.jsx";
 
 
 import './App.css'
 
 gsap.registerPlugin(ScrollTrigger);
 
-function App() {    
+function App() { 
+  
+  useZoomInText({ selector: "span, h2" });
   useEffect(() => {
     const lenis = new Lenis();
 
@@ -39,6 +44,7 @@ function App() {
   return (
     <>
     <main className="main_content site_flex flex_column site_gap"> 
+    <SplittingText />
     <VideoBanner />
     <AboutUs/>
     <ProjectsSection />
