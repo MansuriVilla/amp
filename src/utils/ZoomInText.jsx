@@ -119,7 +119,7 @@ export function useZoomInText(config = {}) {
             });
             tl.progress(0).pause();
           },
-          markers: true, // Set to true for debugging
+        //   markers: true, // Set to true for debugging
         });
 
         animationsRef.current.push(tl);
