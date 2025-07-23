@@ -8,7 +8,7 @@ function Footer() {
   return (
     <footer id="site_footer">
       <div className="site_container">
-        <div className="site_flex space_between">
+        <div className="site_flex space_between footer_main">
           <div className="footer_left">
             <div className="footer_left-inner site_flex flex_column">
               <div className="footer_logo">
