@@ -5,3 +5,16 @@
 .contact_card { flex: 1; }
 .contact_image { width: 100%; }
 /* .contact_card-top{position: relative; height: 100%; width: 100%;} */
+
+@media (max-width:820px){
+.contact_cards.site_flex.site_gap{
+        flex-direction: column;
+    }
+}
+
+@media (max-width:768px) {
+    
+    .contact_card-bottom--inner{
+        padding: 20px;
+    }
+}

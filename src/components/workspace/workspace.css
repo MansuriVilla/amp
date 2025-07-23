@@ -1,4 +1,4 @@
-.wrokSpace_section{ overflow: hidden; min-height: 100vh; }
+.wrokSpace_section{ overflow: hidden; min-height: 100%; }
 .work-space--slide-item { position: relative; display: flex; justify-content: center; align-items: center; flex: 0 0 30vw; aspect-ratio: 1.7/1.6; }
 .work-space_items{gap: calc(var(--space) - 20px);}
 .work-space--slide-item img {object-fit: cover;}

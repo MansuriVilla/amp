@@ -1,6 +1,6 @@
 .projects_section{
     /* overflow: hidden; */
-    min-height: 100vh;
+    min-height: clamp(30vh, 20vw, 100vh);
     
 }
 
@@ -134,4 +134,13 @@
       gap: 15px;
       align-items: center;
       justify-content: center;
+    }
+
+
+
+    @media (max-width:768px) {
+      .project_cta{
+        padding: 10px 20px;
+        font-size: 16px;
+      }
     }
