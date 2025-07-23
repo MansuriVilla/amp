@@ -8,8 +8,7 @@ import { useImageDistortion } from '../../utils/Shaders';
 gsap.registerPlugin(ScrollTrigger);
 
 function Contact() {
-  // You can keep your existing GSAP logic here if it's working for other elements.
-  // For the image distortion, the hook handles its own animation.
+
 
   return (
     <section className="contact_section">
@@ -25,8 +24,7 @@ function Contact() {
             <div className="contact_cards-container">
               <div className="contact_cards site_flex site_gap">
                 {contactData.map((contact) => {
-                  // IMPORTANT: Call the hook inside the map for each item
-                  // This ensures each card gets its own independent Three.js instance
+                
                   const [imageContainerRef, imageElementRef] = useImageDistortion(contact.cardImage);
 
                   return (

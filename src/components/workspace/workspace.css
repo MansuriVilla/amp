@@ -6,4 +6,4 @@
 
 .wrokSpace_section-top p {max-width: 850px;}
 
-.slide_in-view__images .slide_in-view__image{opacity: 0; transform: translateX(0%); will-change: transform;}
+.slide_in-view__images .slide_in-view__image{/* opacity: 0;  */transform: translateX(0%); will-change: transform;}
