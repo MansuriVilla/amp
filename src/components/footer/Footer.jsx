@@ -21,7 +21,8 @@ function Footer() {
                 <a href="mailto:info@theampmedia.com">
                   <span className="anchor_hover">info@theampmedia.com</span>
                   <span>
-                    <img src={linkIcon} alt="Email Link Icon" />
+                    <img className="icon-default" src={linkIcon} alt="Email Link Icon" />
+                    <img className="icon-hover" src={linkIcon} alt="Email Link Icon" />
                   </span>
                 </a>
               </div>

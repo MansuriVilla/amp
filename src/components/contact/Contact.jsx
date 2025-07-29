@@ -1,9 +1,8 @@
-import { useEffect, useRef } from "react";
-import contactData from "../../data/contactData.json";
-import "./contact.css";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useImageDistortion } from '../../utils/Shaders'; 
+import "./contact.css";
+import contactData from "../../data/contactData.json";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,13 +10,13 @@ function Contact() {
 
 
   return (
-    <section className="contact_section">
+    <section className="contact_section reveal-section">
       <div className="site_container">
         <div className="contact_section-inner site_flex flex_column site_gap">
           <div className="contact_section-top">
             <div className="site_container">
-              <span className="section_name">CONTACT</span>
-              <h2>Work With Us</h2>
+              <span className="section_name reveal-text">CONTACT</span>
+              <h2 className="reveal-text">Work With Us</h2>
             </div>
           </div>
           <div className="contact_section-bottom slide_in-view__container">
@@ -32,14 +31,13 @@ function Contact() {
                       <div className="contact_card-inner">
                         <div
                           className="contact_card-top"
-                          ref={imageContainerRef} // Attach the container ref here
+                          ref={imageContainerRef}
                           style={{
-                            width: '100%', // Crucial for container dimensions
-                            height: '380px', // Set an explicit height for the container, adjust as needed
-                            overflow: 'hidden', // Hides anything outside the container's bounds
-                            position: 'relative', // Necessary for absolute positioning of image and canvas
-                            cursor: 'pointer', // Indicates interactivity
-                            // Add any other desired styling for the container here
+                            width: '100%',
+                            height: 'clamp(250px, 20vw, 380px)',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            cursor: 'pointer',      
                           }}
                         >
                           <img
@@ -47,17 +45,15 @@ function Contact() {
                             alt={contact.cardImage}
                             decoding="async"
                             className="contact_image"
-                            ref={imageElementRef} // Attach the image element ref here
+                            ref={imageElementRef}
                             style={{
-                              width: '100%', // Image fills its container
-                              height: '100%', // Image fills its container
-                              objectFit: 'cover', // Ensures image covers the area without distortion
-                              opacity: 0, // CRITICAL: Makes the original image invisible
-                                        // Three.js renders to a canvas on top of this.
-                              position: 'absolute', // Takes image out of document flow
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              opacity: 0, 
+                              position: 'absolute',
                               top: 0,
                               left: 0,
-                              // Ensure no other CSS overrides these crucial styles
                             }}
                           />
                         </div>

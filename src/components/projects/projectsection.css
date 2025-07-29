@@ -1,5 +1,5 @@
 .projects_section{
-    /* overflow: hidden; */
+
     min-height: clamp(30vh, 20vw, 100vh);
     
 }
@@ -75,6 +75,7 @@
     z-index: 999;
     backdrop-filter: blur(10px); /* Optional: adds a blur effect to the background */
     transition: all linear 1s;
+    
 
   }
   
@@ -83,38 +84,49 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 90vh; /* Adjust as needed */
-    overflow-y: auto; /* Enable scrolling */
-    background: white;
+    overflow: hidden;
     z-index: 1000;
-    transform: translateY(100%); /* Start off-screen */
-    max-width: 1700px;
+    transform: translateY(100%);
     margin: 0 auto;
-    border-radius: 20px 20px 0 0 ;
+    display: flex;
+    justify-content: center;
+  }
+
+  .overlay_inner {
+    max-width: 1700px;
+    width: 100%;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    height: clamp(70vh, 50vw, 90vh);
+    overflow-y: auto;
+    position: relative;
+  }
+
+
+  .overlay_close {
+    position: absolute;
+    right: 20px;
+    top: 20px;
   }
 
   .overlay_close-icon {
-    position: fixed;
-    top: 20px;
-    
-    right: 20px;
+    position: sticky;
+    top: 0;
     display: flex;
     cursor: pointer;
     background: #ffffff20;
-    padding: 20px;
+    padding: clamp(10px,3vw,20px);
     line-height: 1;
     outline: none;
-      border-radius: 50px;
-      border: none;
+    border-radius: 50px;
+    border: none;
   }
-
-
   
   .overlay .project_overlay-cover img {
     max-width: 100%;
     height: auto;
     width: 100%;
-    margin-bottom: 20px;
+    
     aspect-ratio: 16/9;
     object-fit: cover;
   }
@@ -127,8 +139,13 @@
     color: #333;
   }
 
-  .overlay_project-details--inner{padding: 30px;    justify-content: space-between;
+  .overlay_project-details--inner{padding: clamp(15px,3vw,30px);    justify-content: space-between;
     align-items: flex-start;}
+
+    .project_details-link a {
+      font-size: clamp(16px,4vw, 24px);
+    }
+
 
     .project_details-link a {
       gap: 15px;
@@ -138,9 +155,37 @@
 
 
 
+    .project_details-link a span.anchor_hover::after {z-index: 1;}
+    .project_details-link a img {position: absolute; overflow: hidden; transition: 0.5s all;}
+    .project_details-link a:hover .icon-default {
+      transform: translate(60px) translateY(-60px);
+    }
+  
+ 
+  
+  
+    .project_details-link a:hover .icon-hover {
+      transform: translate(0px) translateY(0px);
+    }
+    .project_details-link a span + span:not(span.anchor_hover) {
+      display: flex;
+      position: relative;
+      height: 36px;
+      width: 36px;
+      overflow: hidden;
+      justify-content: center;
+    align-items: center
+    }
+
+
+
     @media (max-width:768px) {
       .project_cta{
         padding: 10px 20px;
         font-size: 16px;
+      }
+      .overlay_project-details--inner{flex-direction: column; gap: 30px;}
+      .overlay_close-icon svg {
+        scale: 0.8;
       }
     }

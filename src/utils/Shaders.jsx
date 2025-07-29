@@ -84,13 +84,13 @@ export const useImageDistortion = (imageUrl) => {
   }, []);
 
   const initializeScene = useCallback((texture) => {
-    console.log('--- Initializing scene for URL:', imageUrl, '---');
+    
     if (!imageContainerRef.current) {
-      console.error(`[ImageDistortion] imageContainerRef.current is null for ${imageUrl}!`);
+      
       return;
     }
     if (!imageElementRef.current) {
-      console.error(`[ImageDistortion] imageElementRef.current is null for ${imageUrl}!`);
+      
       return;
     }
 
@@ -99,13 +99,13 @@ export const useImageDistortion = (imageUrl) => {
         if (imageContainerRef.current && renderer.current.domElement) {
             if (imageContainerRef.current.contains(renderer.current.domElement)) {
                  imageContainerRef.current.removeChild(renderer.current.domElement);
-                 console.log(`[ImageDistortion] Removed previous canvas for ${imageUrl}.`);
+                 
             } else {
                  console.warn(`[ImageDistortion] Canvas not found as child for ${imageUrl} during re-init cleanup.`);
             }
         }
         renderer.current.dispose();
-        console.log(`[ImageDistortion] Disposed previous renderer for ${imageUrl}.`);
+        
     }
     if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -115,7 +115,7 @@ export const useImageDistortion = (imageUrl) => {
     const imageWidth = imageElementRef.current.offsetWidth;
     const imageHeight = imageElementRef.current.offsetHeight;
 
-    console.log(`[ImageDistortion] Image Element Dimensions: ${imageWidth}x${imageHeight} for ${imageUrl}`);
+    
     if (imageWidth === 0 || imageHeight === 0) {
         console.warn(`[ImageDistortion] Image element has zero dimensions (${imageWidth}x${imageHeight}) for ${imageUrl}. Cannot initialize Three.js scene correctly.`);
         console.warn('Please ensure the <img> element or its parent (contact_card-top) has explicit width/height in CSS.');
@@ -168,17 +168,17 @@ export const useImageDistortion = (imageUrl) => {
 
     try {
         imageContainerRef.current.appendChild(renderer.current.domElement);
-        console.log(`[ImageDistortion] Canvas appended for ${imageUrl}.`);
+        
     } catch (e) {
-        console.error(`[ImageDistortion] Failed to append canvas for ${imageUrl}:`, e);
+        
     }
     
     if (renderer.current && planeMesh.current) {
         animateScene();
         isInitializedRef.current = true;
-        console.log(`[ImageDistortion] Scene initialized and animation started for ${imageUrl}.`);
+        
     } else {
-        console.error(`[ImageDistortion] Scene or renderer not ready after initialization for ${imageUrl}.`);
+        
     }
 
   }, [animateScene, imageUrl]);
@@ -213,10 +213,10 @@ export const useImageDistortion = (imageUrl) => {
   }, []);
 
   useEffect(() => {
-    console.log(`[ImageDistortion] useEffect for ${imageUrl} - isInitializedRef.current: ${isInitializedRef.current}, imageElementRef.current: ${!!imageElementRef.current}`);
+    
     
     if (imageUrl && imageElementRef.current && !isInitializedRef.current) { 
-      console.log(`[ImageDistortion] Loading texture for ${imageUrl}...`);
+      
       const loader = new THREE.TextureLoader();
       loader.load(imageUrl,
         (texture) => {
@@ -224,23 +224,23 @@ export const useImageDistortion = (imageUrl) => {
         },
         undefined,
         (error) => {
-          console.error(`[ImageDistortion] Error loading texture for ${imageUrl}:`, error);
+          
         }
       );
     }
 
     const container = imageContainerRef.current;
     if (container) {
-      console.log(`[ImageDistortion] Adding event listeners for ${imageUrl}.`);
+      
       container.addEventListener("mousemove", handleMouseMove);
       container.addEventListener("mouseenter", handleMouseEnter);
       container.addEventListener("mouseleave", handleMouseLeave);
     } else {
-      console.log(`[ImageDistortion] Container ref not available for event listeners for ${imageUrl}.`);
+      
     }
 
     return () => {
-      console.log(`[ImageDistortion] Cleaning up for ${imageUrl} (from useEffect cleanup).`);
+      
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -251,11 +251,11 @@ export const useImageDistortion = (imageUrl) => {
       }
       if (renderer.current) {
         renderer.current.dispose();
-        console.log(`[ImageDistortion] Renderer disposed for ${imageUrl}.`);
+        
         if (container && renderer.current.domElement) {
             if (container.contains(renderer.current.domElement)) {
                 container.removeChild(renderer.current.domElement);
-                console.log(`[ImageDistortion] Canvas removed for ${imageUrl}.`);
+                
             } else {
                 console.warn(`[ImageDistortion] Canvas not found as child for ${imageUrl} during useEffect cleanup.`);
             }
