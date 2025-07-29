@@ -12,8 +12,7 @@ function VideoBanner() {
           muted
           playsInline
           className="video-banner"
-        >
-        </video>
+        ></video>
       </div>
     </section>
   );

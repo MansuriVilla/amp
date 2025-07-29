@@ -1,18 +1,5 @@
-.about_us_main_content{
-    max-width: 800px;
-}
-.about_us_content-top{
-    margin-bottom: 10px;
-}
-.about_us_content-top h1{
-    margin-bottom: 10px;
-}
-.about_us_content_bottom .text_underline div{
-    position: relative;
-    text-decoration: underline;
-}
-
-
-.about_us_content_bottom h2 .light_text{
-    font-weight: 400;
-}
+.about_us_main_content { max-width: 800px; }
+.about_us_content-top { margin-bottom: 10px; }
+.about_us_content-top h1 { margin-bottom: 10px; }
+.about_us_content_bottom .text_underline div { position: relative; text-decoration: underline; }
+.about_us_content_bottom h2 .light_text { font-weight: 400; }

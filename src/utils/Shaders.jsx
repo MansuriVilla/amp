@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import * as THREE from 'three';
+import { useEffect, useRef, useState, useCallback } from "react";
+import * as THREE from "three";
 
 // --- IMPORTANT: THESE SHADER DEFINITIONS MUST BE HERE AT THE TOP ---
 const vertexShader = `
@@ -43,7 +43,7 @@ export const useImageDistortion = (imageUrl) => {
   const imageContainerRef = useRef(null);
   const imageElementRef = useRef(null);
   const isInitializedRef = useRef(false); // Use a ref for initialization flag
-  const animationFrameId = useRef(null); 
+  const animationFrameId = useRef(null);
 
   // THREE.js state variables
   const scene = useRef(null);
@@ -60,11 +60,15 @@ export const useImageDistortion = (imageUrl) => {
 
   const animateScene = useCallback(() => {
     if (!renderer.current || !planeMesh.current) {
-        return;
+      return;
     }
 
-    mousePosition.current.x += (targetMousePosition.current.x - mousePosition.current.x) * easeFactor.current;
-    mousePosition.current.y += (targetMousePosition.current.y - mousePosition.current.y) * easeFactor.current;
+    mousePosition.current.x +=
+      (targetMousePosition.current.x - mousePosition.current.x) *
+      easeFactor.current;
+    mousePosition.current.y +=
+      (targetMousePosition.current.y - mousePosition.current.y) *
+      easeFactor.current;
 
     planeMesh.current.material.uniforms.u_mouse.value.set(
       mousePosition.current.x,
@@ -76,112 +80,112 @@ export const useImageDistortion = (imageUrl) => {
       1.0 - prevPosition.current.y
     );
 
-    aberrationIntensity.current = Math.max(0.0, aberrationIntensity.current - 0.05);
-    planeMesh.current.material.uniforms.u_aberrationIntensity.value = aberrationIntensity.current;
+    aberrationIntensity.current = Math.max(
+      0.0,
+      aberrationIntensity.current - 0.05
+    );
+    planeMesh.current.material.uniforms.u_aberrationIntensity.value =
+      aberrationIntensity.current;
 
     renderer.current.render(scene.current, camera.current);
     animationFrameId.current = requestAnimationFrame(animateScene);
   }, []);
 
-  const initializeScene = useCallback((texture) => {
-    
-    if (!imageContainerRef.current) {
-      
-      return;
-    }
-    if (!imageElementRef.current) {
-      
-      return;
-    }
+  const initializeScene = useCallback(
+    (texture) => {
+      if (!imageContainerRef.current) {
+        return;
+      }
+      if (!imageElementRef.current) {
+        return;
+      }
 
-    // Clean up any previous scene/renderer if re-initializing
-    if (renderer.current) {
+      // Clean up any previous scene/renderer if re-initializing
+      if (renderer.current) {
         if (imageContainerRef.current && renderer.current.domElement) {
-            if (imageContainerRef.current.contains(renderer.current.domElement)) {
-                 imageContainerRef.current.removeChild(renderer.current.domElement);
-                 
-            } else {
-                 console.warn(`[ImageDistortion] Canvas not found as child for ${imageUrl} during re-init cleanup.`);
-            }
+          if (imageContainerRef.current.contains(renderer.current.domElement)) {
+            imageContainerRef.current.removeChild(renderer.current.domElement);
+          } else {
+            console.warn(
+              `[ImageDistortion] Canvas not found as child for ${imageUrl} during re-init cleanup.`
+            );
+          }
         }
         renderer.current.dispose();
-        
-    }
-    if (animationFrameId.current) {
+      }
+      if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
         animationFrameId.current = null;
-    }
+      }
 
-    const imageWidth = imageElementRef.current.offsetWidth;
-    const imageHeight = imageElementRef.current.offsetHeight;
+      const imageWidth = imageElementRef.current.offsetWidth;
+      const imageHeight = imageElementRef.current.offsetHeight;
 
-    
-    if (imageWidth === 0 || imageHeight === 0) {
-        console.warn(`[ImageDistortion] Image element has zero dimensions (${imageWidth}x${imageHeight}) for ${imageUrl}. Cannot initialize Three.js scene correctly.`);
-        console.warn('Please ensure the <img> element or its parent (contact_card-top) has explicit width/height in CSS.');
-        return; 
-    }
+      if (imageWidth === 0 || imageHeight === 0) {
+        console.warn(
+          `[ImageDistortion] Image element has zero dimensions (${imageWidth}x${imageHeight}) for ${imageUrl}. Cannot initialize Three.js scene correctly.`
+        );
+        console.warn(
+          "Please ensure the <img> element or its parent (contact_card-top) has explicit width/height in CSS."
+        );
+        return;
+      }
 
-    // --- Calculate aspect ratio for the plane ---
-    const aspectRatio = imageWidth / imageHeight;
-    // We want the plane to fill the camera's view, so we'll adjust either width or height based on aspect ratio.
-    // Assuming the plane starts with height 2 (to fill from -1 to 1 vertically)
-    const planeHeight = 2;
-    const planeWidth = planeHeight * aspectRatio;
-    // If you prefer to fix the width to 2 and adjust height:
-    // const planeWidth = 2;
-    // const planeHeight = planeWidth / aspectRatio;
+      // --- Calculate aspect ratio for the plane ---
+      const aspectRatio = imageWidth / imageHeight;
+      // We want the plane to fill the camera's view, so we'll adjust either width or height based on aspect ratio.
+      // Assuming the plane starts with height 2 (to fill from -1 to 1 vertically)
+      const planeHeight = 2;
+      const planeWidth = planeHeight * aspectRatio;
+      // If you prefer to fix the width to 2 and adjust height:
+      // const planeWidth = 2;
+      // const planeHeight = planeWidth / aspectRatio;
 
+      scene.current = new THREE.Scene();
 
-    scene.current = new THREE.Scene();
+      camera.current = new THREE.PerspectiveCamera(
+        80, // Field of view
+        imageWidth / imageHeight, // Aspect ratio of the canvas/container
+        0.01,
+        10
+      );
+      camera.current.position.z = 1; // Keep the camera position the same
 
-    camera.current = new THREE.PerspectiveCamera(
-      80, // Field of view
-      imageWidth / imageHeight, // Aspect ratio of the canvas/container
-      0.01,
-      10
-    );
-    camera.current.position.z = 1; // Keep the camera position the same
+      let shaderUniforms = {
+        u_mouse: { type: "v2", value: new THREE.Vector2() },
+        u_prevMouse: { type: "v2", value: new THREE.Vector2() },
+        u_aberrationIntensity: { type: "f", value: 0.0 },
+        u_texture: { type: "t", value: texture },
+      };
 
-    let shaderUniforms = {
-      u_mouse: { type: "v2", value: new THREE.Vector2() },
-      u_prevMouse: { type: "v2", value: new THREE.Vector2() },
-      u_aberrationIntensity: { type: "f", value: 0.0 },
-      u_texture: { type: "t", value: texture }
-    };
+      planeMesh.current = new THREE.Mesh(
+        // --- IMPORTANT CHANGE HERE: Use calculated dimensions for PlaneGeometry ---
+        new THREE.PlaneGeometry(planeWidth, planeHeight),
+        new THREE.ShaderMaterial({
+          uniforms: shaderUniforms,
+          vertexShader,
+          fragmentShader,
+        })
+      );
 
-    planeMesh.current = new THREE.Mesh(
-      // --- IMPORTANT CHANGE HERE: Use calculated dimensions for PlaneGeometry ---
-      new THREE.PlaneGeometry(planeWidth, planeHeight), 
-      new THREE.ShaderMaterial({
-        uniforms: shaderUniforms,
-        vertexShader,
-        fragmentShader
-      })
-    );
+      scene.current.add(planeMesh.current);
 
-    scene.current.add(planeMesh.current);
+      renderer.current = new THREE.WebGLRenderer({ alpha: true });
+      renderer.current.setSize(imageWidth, imageHeight);
+      renderer.current.setPixelRatio(window.devicePixelRatio);
 
-    renderer.current = new THREE.WebGLRenderer({ alpha: true });
-    renderer.current.setSize(imageWidth, imageHeight);
-    renderer.current.setPixelRatio(window.devicePixelRatio); 
-
-    try {
+      try {
         imageContainerRef.current.appendChild(renderer.current.domElement);
-        
-    } catch (e) {
-        
-    }
-    
-    if (renderer.current && planeMesh.current) {
+      } catch (e) {}
+
+      if (renderer.current && planeMesh.current) {
         animateScene();
         isInitializedRef.current = true;
-        
-    } else {
-        
-    }
-
-  }, [animateScene, imageUrl]);
+      } else {
+      }
+    },
+    [animateScene, imageUrl]
+  );
 
   const handleMouseMove = useCallback((event) => {
     if (!imageContainerRef.current) return;
@@ -200,9 +204,11 @@ export const useImageDistortion = (imageUrl) => {
     easeFactor.current = 0.02;
     const rect = imageContainerRef.current.getBoundingClientRect();
 
-    mousePosition.current.x = targetMousePosition.current.x = (event.clientX - rect.left) / rect.width;
-    mousePosition.current.y = targetMousePosition.current.y = (event.clientY - rect.top) / rect.height;
-    
+    mousePosition.current.x = targetMousePosition.current.x =
+      (event.clientX - rect.left) / rect.width;
+    mousePosition.current.y = targetMousePosition.current.y =
+      (event.clientY - rect.top) / rect.height;
+
     aberrationIntensity.current = 1;
   }, []);
 
@@ -213,34 +219,27 @@ export const useImageDistortion = (imageUrl) => {
   }, []);
 
   useEffect(() => {
-    
-    
-    if (imageUrl && imageElementRef.current && !isInitializedRef.current) { 
-      
+    if (imageUrl && imageElementRef.current && !isInitializedRef.current) {
       const loader = new THREE.TextureLoader();
-      loader.load(imageUrl,
+      loader.load(
+        imageUrl,
         (texture) => {
           initializeScene(texture);
         },
         undefined,
-        (error) => {
-          
-        }
+        (error) => {}
       );
     }
 
     const container = imageContainerRef.current;
     if (container) {
-      
       container.addEventListener("mousemove", handleMouseMove);
       container.addEventListener("mouseenter", handleMouseEnter);
       container.addEventListener("mouseleave", handleMouseLeave);
     } else {
-      
     }
 
     return () => {
-      
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
@@ -251,25 +250,32 @@ export const useImageDistortion = (imageUrl) => {
       }
       if (renderer.current) {
         renderer.current.dispose();
-        
+
         if (container && renderer.current.domElement) {
-            if (container.contains(renderer.current.domElement)) {
-                container.removeChild(renderer.current.domElement);
-                
-            } else {
-                console.warn(`[ImageDistortion] Canvas not found as child for ${imageUrl} during useEffect cleanup.`);
-            }
+          if (container.contains(renderer.current.domElement)) {
+            container.removeChild(renderer.current.domElement);
+          } else {
+            console.warn(
+              `[ImageDistortion] Canvas not found as child for ${imageUrl} during useEffect cleanup.`
+            );
+          }
         }
       }
-      isInitializedRef.current = false; 
-      
+      isInitializedRef.current = false;
+
       scene.current = null;
       camera.current = null;
       renderer.current = null;
       planeMesh.current = null;
       animationFrameId.current = null;
     };
-  }, [imageUrl, initializeScene, handleMouseMove, handleMouseEnter, handleMouseLeave]);
-                                                                                           
+  }, [
+    imageUrl,
+    initializeScene,
+    handleMouseMove,
+    handleMouseEnter,
+    handleMouseLeave,
+  ]);
+
   return [imageContainerRef, imageElementRef];
 };

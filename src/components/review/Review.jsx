@@ -1,12 +1,7 @@
 import ReviewData from "../../data/ReviewData.json";
 import "./review.css";
 
-
-
 function Review() {
-
-
-
   return (
     <>
       <section className="review_section reveal-section">
@@ -24,20 +19,24 @@ function Review() {
                   {ReviewData.map((review) => (
                     <div
                       className="review_row site_flex flex_column site_gap"
-                      
-                      
                       key={review.id}
                     >
-                      
                       <h4
                         className="Review_text reveal-text"
                         dangerouslySetInnerHTML={{ __html: review.text }}
                       ></h4>
                       <div className="site_flex review_client-details">
-                       
-                        <p className="review-client_name reveal-text" dangerouslySetInnerHTML={{ __html: review.name }}></p>
-                       
-                        <p className="light client_at reveal-text" dangerouslySetInnerHTML={{ __html: review.companyName }}></p>
+                        <p
+                          className="review-client_name reveal-text"
+                          dangerouslySetInnerHTML={{ __html: review.name }}
+                        ></p>
+
+                        <p
+                          className="light client_at reveal-text"
+                          dangerouslySetInnerHTML={{
+                            __html: review.companyName,
+                          }}
+                        ></p>
                       </div>
                     </div>
                   ))}

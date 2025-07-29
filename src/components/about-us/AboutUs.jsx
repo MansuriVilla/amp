@@ -15,7 +15,6 @@ function AboutUs() {
           </div>
           <div className="about_us_content_bottom reveal-text">
             <h2>
-         
               <span className="text_underline ">Design</span>,
               <span className="text_underline">code</span>,
               <span className="text_underline">motion</span>, and

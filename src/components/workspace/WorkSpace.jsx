@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, useCallback, useLayoutEffect } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import WorkSpaceData from "../../data/WorkSpaceData.json";
 import "./workspace.css";
 import { gsap } from "gsap";
@@ -10,19 +16,26 @@ function WorkSpace() {
   const sectionRef = useRef(null);
   const sliderRef = useRef(null);
   const mainScrollTrigger = useRef(null);
-  const [isImageLoading, setIsImageLoading] = useState(true);
 
-  const [lightboxOpen, setLightboxOpen] = useState(false); // Controls animation start/end
-  const [isLightboxMounted, setIsLightboxMounted] = useState(false); // Controls actual DOM rendering
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isLightboxMounted, setIsLightboxMounted] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const lightboxRef = useRef(null);
   const lightboxContentRef = useRef(null);
   const lightboxThumbnailsRef = useRef(null);
 
+  const [customCursorVisible, setCustomCursorVisible] = useState(false);
+  const [customCursorPosition, setCustomCursorPosition] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [customCursorType, setCustomCursorType] = useState("default");
+  const customCursorRef = useRef(null);
+
   const lightboxImagesRefs = useRef([]);
   const lightboxThumbnailElementsRefs = useRef([]);
 
-  // Callback to add image refs, ensuring they are sorted by data-index
   const addLightboxImageRef = useCallback((el) => {
     if (el && !lightboxImagesRefs.current.includes(el)) {
       lightboxImagesRefs.current.push(el);
@@ -32,7 +45,6 @@ function WorkSpace() {
     }
   }, []);
 
-  // Callback to add individual thumbnail refs
   const addLightboxThumbnailRef = useCallback((el) => {
     if (el && !lightboxThumbnailElementsRefs.current.includes(el)) {
       lightboxThumbnailElementsRefs.current.push(el);
@@ -42,9 +54,9 @@ function WorkSpace() {
     }
   }, []);
 
-  // GSAP animation for individual slide item CTAs
   useEffect(() => {
     const slideItems = document.querySelectorAll(".work-space--slide-item");
+    const ctaTriggers = [];
 
     slideItems.forEach((slideItem) => {
       const cta = slideItem.querySelector(".wrokSpace_cta");
@@ -52,35 +64,26 @@ function WorkSpace() {
       if (cta) {
         gsap.set(cta, { y: 20, opacity: 0 });
 
-        gsap.to(cta, {
-          y: 0,
-          opacity: 1,
-          ease: "power1.out",
-          scrollTrigger: {
-            trigger: slideItem,
-            start: "left center",
-            end: "left 20%",
-            toggleActions: "play none none reverse",
-          },
+        const ctaTrigger = ScrollTrigger.create({
+          trigger: slideItem,
+          start: "left center",
+          end: "left 20%",
+          toggleActions: "play none none reverse",
+          animation: gsap.to(cta, {
+            y: 0,
+            opacity: 1,
+            ease: "power1.out",
+          }),
         });
+        ctaTriggers.push(ctaTrigger);
       }
     });
 
-    // Cleanup function for ScrollTrigger instances
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (
-          trigger.trigger &&
-          trigger.trigger.classList &&
-          trigger.trigger.classList.contains("work-space--slide-item")
-        ) {
-          trigger.kill();
-        }
-      });
+      ctaTriggers.forEach((trigger) => trigger.kill());
     };
   }, []);
 
-  // Horizontal scroll animation and parallax effect
   useEffect(() => {
     const config = {
       SCROLL_SPEED: 1.5,
@@ -98,37 +101,47 @@ function WorkSpace() {
 
     const checkMobile = () => {
       state.isMobile = window.innerWidth < 1000;
-      state.slideWidth = state.isMobile ? 175 + 2 * 10 : 350 + 2 * 20; // Width + 2 * margin
+
+      state.slideWidth = state.isMobile ? 175 + 2 * 10 : 350 + 2 * 20;
     };
 
     const initializeSlides = () => {
       const track = sliderRef.current;
       if (!track) return;
 
-      track.innerHTML = ""; // Clear existing slides
+      track.innerHTML = "";
       state.slides = [];
       checkMobile();
 
-      const copiesMultiplier = 5; // To create an infinite scroll effect
+      const copiesMultiplier = 5;
       const totalSlidesInTrack = totalSlideCount * copiesMultiplier;
 
       for (let i = 0; i < totalSlidesInTrack; i++) {
         const dataIndex = i % totalSlideCount;
         const slide = document.createElement("div");
         slide.className = "work-space--slide-item slide_in-view__image";
-        slide.dataset.index = dataIndex; // Store original index
+        slide.dataset.index = dataIndex;
         slide.innerHTML = `
           <div class="item_bg">
-            <img src="${WorkSpaceData[dataIndex].image_bg}" alt="${WorkSpaceData[dataIndex].name}" decoding="async" />
+            <img src="${WorkSpaceData[dataIndex].image_bg}" alt="${
+          WorkSpaceData[dataIndex].name
+        }" decoding="async" loading="lazy" />
           </div>
-
+          ${
+            WorkSpaceData[dataIndex].cta_text
+              ? `<div class="wrokSpace_cta">${WorkSpaceData[dataIndex].cta_text}</div>`
+              : ""
+          }
         `;
-        slide.addEventListener("click", () => openLightbox(dataIndex));
+
+        slide.addEventListener("click", () => {
+          openLightbox(dataIndex);
+        });
+
         track.appendChild(slide);
         state.slides.push(slide);
       }
 
-      // Set initial position to be in the middle of the copied slides
       const initialOffset =
         totalSlideCount * state.slideWidth * Math.floor(copiesMultiplier / 2);
       state.currentX = -initialOffset;
@@ -142,11 +155,16 @@ function WorkSpace() {
 
       const sequenceWidth = totalSlideCount * state.slideWidth;
 
-      // Loop the scroll
-      if (state.currentX < -sequenceWidth * 3) {
+      if (
+        state.currentX <
+        -sequenceWidth * (Math.floor(WorkSpaceData.length / 2) + 1)
+      ) {
         state.currentX += sequenceWidth;
         state.targetX += sequenceWidth;
-      } else if (state.currentX > -sequenceWidth * 2) {
+      } else if (
+        state.currentX >
+        -sequenceWidth * Math.floor(WorkSpaceData.length / 2)
+      ) {
         state.currentX -= sequenceWidth;
         state.targetX -= sequenceWidth;
       }
@@ -162,7 +180,6 @@ function WorkSpace() {
 
         const slideRect = slide.getBoundingClientRect();
 
-        // Optimize: if slide is out of view, reset transform
         if (slideRect.right < 0 || slideRect.left > window.innerWidth) {
           img.style.transform = "scale(1.8) translateX(0px)";
           return;
@@ -170,7 +187,7 @@ function WorkSpace() {
 
         const slideCenter = slideRect.left + slideRect.width / 2;
         const distanceFromCenter = slideCenter - viewportCenter;
-        const parallaxOffset = distanceFromCenter * -0.25; // Adjust parallax intensity
+        const parallaxOffset = distanceFromCenter * -0.25;
 
         img.style.transform = `translateX(${parallaxOffset}px) scale(1.8)`;
       });
@@ -178,14 +195,13 @@ function WorkSpace() {
 
     const animate = () => {
       state.currentX += (state.targetX - state.currentX) * config.LERP_FACTOR;
-      state.targetX -= config.SCROLL_SPEED; // Continuous scroll
+      state.targetX -= config.SCROLL_SPEED;
       updateSlidePositions();
       updateParallax();
       state.animationId = requestAnimationFrame(animate);
     };
 
-    // ScrollTrigger to initialize and animate the slider when it enters view
-    const slideInView = () => {
+    const setupScrollTrigger = () => {
       const container = document.querySelector(
         ".slide_in-view__container .slide_in-view__row"
       );
@@ -194,52 +210,58 @@ function WorkSpace() {
         return;
       }
 
-      let initSlides = false; // Flag to prevent re-initialization on every enter
-
       mainScrollTrigger.current = ScrollTrigger.create({
         trigger: container,
-        start: "top 80%", // When the top of the container hits 80% of the viewport height
+        start: "top 80%",
         onEnter: () => {
-          if (initSlides) return;
-          initSlides = true;
+          initializeSlides();
+          animate();
 
-          initializeSlides(); // Populate and position slides
-
-          // Initial GSAP animation for slides coming into view
-          gsap.set(".slide_in-view__images .work-space--slide-item", {
-            opacity: 0,
-            x: "100%",
-          });
-
-          gsap.to(".slide_in-view__images .work-space--slide-item", {
-            opacity: 1,
-            x: "0%",
-            duration: 1.6,
-            stagger: 0.1,
-            ease: "power4.out",
-          });
-
-          animate(); // Start the continuous scroll animation
+          gsap.fromTo(
+            ".slide_in-view__images .work-space--slide-item",
+            {
+              opacity: 0,
+              x: "100%",
+            },
+            {
+              opacity: 1,
+              x: "0%",
+              duration: 1.6,
+              stagger: 0.1,
+              ease: "power4.out",
+              onComplete: () => {
+                gsap.set(".slide_in-view__images .work-space--slide-item", {
+                  pointerEvents: "auto",
+                });
+              },
+            }
+          );
         },
         onLeaveBack: () => {
-          // Stop animation and reset on leaving the view
           if (state.animationId) {
             cancelAnimationFrame(state.animationId);
             state.animationId = null;
           }
-          initSlides = false;
+
+          gsap.set(".slide_in-view__images .work-space--slide-item", {
+            pointerEvents: "none",
+          });
         },
       });
-
-      ScrollTrigger.refresh(); // Recalculate positions
+      ScrollTrigger.refresh();
     };
 
-    slideInView();
-    window.addEventListener("resize", initializeSlides); // Reinitialize on resize
+    setupScrollTrigger();
+    window.addEventListener("resize", () => {
+      ScrollTrigger.refresh();
+      initializeSlides();
+    });
 
-    // Cleanup for this useEffect
     return () => {
-      window.removeEventListener("resize", initializeSlides);
+      window.removeEventListener("resize", () => {
+        ScrollTrigger.refresh();
+        initializeSlides();
+      });
       if (state.animationId) {
         cancelAnimationFrame(state.animationId);
       }
@@ -247,63 +269,124 @@ function WorkSpace() {
         mainScrollTrigger.current.kill();
         mainScrollTrigger.current = null;
       }
-      // Kill specific ScrollTrigger if it exists
       ScrollTrigger.getAll().forEach((trigger) => {
         if (
-          trigger.trigger ===
-          document.querySelector(
-            ".slide_in-view__container .slide_in-view__row"
-          )
+          trigger.trigger &&
+          trigger.trigger.classList &&
+          trigger.trigger.classList.contains("slide_in-view__row")
         ) {
           trigger.kill();
         }
       });
     };
-  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
+  }, []);
 
-  // Updated to simply set the active class on the current thumbnail
-  const updateThumbnailsHighlight = useCallback(
-    (index) => {
-      if (lightboxThumbnailElementsRefs.current.length > 0) {
-        lightboxThumbnailElementsRefs.current.forEach((thumb, i) => {
-          if (i === index) {
-            thumb.classList.add("active");
-            // Optional: Scroll active thumbnail into view
-            thumb.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-          } else {
-            thumb.classList.remove("active");
-          }
-        });
-      }
-    },
-    []
-  );
+  const updateThumbnailsHighlight = useCallback((index) => {
+    if (lightboxThumbnailElementsRefs.current.length > 0) {
+      lightboxThumbnailElementsRefs.current.forEach((thumb, i) => {
+        if (i === index) {
+          thumb.classList.add("active");
+          thumb.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+          });
+        } else {
+          thumb.classList.remove("active");
+        }
+      });
+    }
+  }, []);
 
-  // This useEffect manages the mounting/unmounting and initial/exit animations of the lightbox
   useEffect(() => {
     if (lightboxOpen) {
-      // If lightbox is supposed to be open, ensure it's mounted
       setIsLightboxMounted(true);
-      document.body.style.overflow = "hidden"; // Prevent body scroll
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("hide-cursor");
+
+      lightboxImagesRefs.current.forEach((imgEl, idx) => {
+        gsap.set(imgEl, {
+          autoAlpha: 0,
+          zIndex: 1,
+          x: "0%",
+          scale: 1,
+        });
+      });
+
+      if (lightboxImagesRefs.current[currentImageIndex]) {
+        const img = new Image();
+        img.src = WorkSpaceData[currentImageIndex].image_bg;
+        img.onload = () => {
+          setIsImageLoading(false);
+          gsap.fromTo(
+            lightboxImagesRefs.current[currentImageIndex],
+            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              delay: 0.1,
+            }
+          );
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", img.src);
+          setIsImageLoading(false);
+        };
+      }
+
+      gsap.fromTo(
+        lightboxThumbnailElementsRefs.current,
+        { y: 20, autoAlpha: 0, scale: 0.8 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          scale: 1,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 0.2,
+        }
+      );
+
+      gsap.to(lightboxRef.current, {
+        autoAlpha: 1,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          updateThumbnailsHighlight(currentImageIndex);
+        },
+      });
     } else if (isLightboxMounted) {
-      // If lightbox is supposed to be closed and is currently mounted, animate out
       const tl = gsap.timeline({
         onComplete: () => {
-          setIsLightboxMounted(false); // Unmount after animation
-          document.body.style.overflow = "auto"; // Restore body scroll
+          setIsLightboxMounted(false);
+          document.body.style.overflow = "auto";
+          document.body.classList.remove("hide-cursor");
+          setCustomCursorVisible(false);
+
+          lightboxImagesRefs.current.forEach((imgEl) => {
+            gsap.set(imgEl, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
+          });
         },
       });
 
-      // Animate individual thumbnails out
       if (lightboxThumbnailElementsRefs.current.length > 0) {
         tl.to(
           lightboxThumbnailElementsRefs.current,
-          { y: 20, autoAlpha: 0, scale: 0.8, duration: 0.3, stagger: 0.03, ease: "power2.in" },
+          {
+            y: 20,
+            autoAlpha: 0,
+            scale: 0.8,
+            duration: 0.3,
+            stagger: 0.03,
+            ease: "power2.in",
+          },
           0
         );
       }
 
-      // Animate current image out
       if (lightboxImagesRefs.current[currentImageIndex]) {
         tl.to(
           lightboxImagesRefs.current[currentImageIndex],
@@ -312,7 +395,6 @@ function WorkSpace() {
         );
       }
 
-      // Animate the entire lightbox overlay out
       if (lightboxRef.current) {
         tl.to(
           lightboxRef.current,
@@ -321,109 +403,51 @@ function WorkSpace() {
         );
       }
     }
-  }, [lightboxOpen, isLightboxMounted, currentImageIndex]); // Dependencies for this effect
+  }, [lightboxOpen, isLightboxMounted]);
 
-  const openLightbox = useCallback(
-    (index) => {
-      setCurrentImageIndex(index);
-      setLightboxOpen(true); // Trigger mounting and enter animation
-      setIsImageLoading(true);
-
-      // Initial state for all lightbox images (before animation starts)
-      // This is now handled by the main useEffect for `lightboxOpen`
-      gsap.set(lightboxImagesRefs.current, { x: "0%", autoAlpha: 0, scale: 1, zIndex: 1 });
-      if (lightboxImagesRefs.current[index]) {
-        gsap.set(lightboxImagesRefs.current[index], { autoAlpha: 1, zIndex: 10 });
-      }
-
-
-      // Initial state for all thumbnails: hidden and slightly off-position
-      if (lightboxThumbnailElementsRefs.current.length > 0) {
-        gsap.set(lightboxThumbnailElementsRefs.current, {
-          y: 20,
-          autoAlpha: 0,
-          scale: 0.8
-        });
-      }
-
-      gsap
-        .timeline({
-          onComplete: () => {
-            // Ensure the correct image is fully visible and in place after initial animation
-            if (lightboxImagesRefs.current[index]) {
-              gsap.set(lightboxImagesRefs.current[index], {
-                x: "0%",
-                autoAlpha: 1,
-                scale: 1,
-                zIndex: 10,
-              });
-            }
-            updateThumbnailsHighlight(index); // Highlight current thumbnail
-          },
-        })
-        .set(lightboxRef.current, { display: "flex", autoAlpha: 0 }) // Ensure lightbox is visible for animation
-        .to(lightboxRef.current, {
-          autoAlpha: 1,
-          duration: 0.5,
-          ease: "power2.out",
-        })
-        .fromTo(
-          lightboxImagesRefs.current[index],
-          { scale: 0.8, autoAlpha: 0 },
-          { scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(1.7)" },
-          "<0.2" // Start main image animation slightly after lightbox opens
-        )
-        .to(
-          lightboxThumbnailElementsRefs.current, // Animate individual thumbnails
-          {
-            y: 0,
-            autoAlpha: 1,
-            scale: 1,
-            duration: 0.3,
-            stagger: 0.05, // Stagger them for a nice effect
-            ease: "power2.out",
-          },
-          "<0.1" // Animate thumbnails up after main image
-        );
-    },
-    [updateThumbnailsHighlight]
-  );
-
-  const closeLightbox = useCallback(() => {
-    setLightboxOpen(false); // This will trigger the useEffect to run the exit animation
-    // No direct GSAP timeline here as it's handled by the useEffect now
+  const openLightbox = useCallback((index) => {
+    setCurrentImageIndex(index);
+    setLightboxOpen(true);
+    setIsImageLoading(true);
   }, []);
 
-  // Helper to determine slide direction for animation
+  const closeLightbox = useCallback(() => {
+    setLightboxOpen(false);
+  }, []);
+
   const directionFromCurrent = useCallback(
     (currentIndex, targetIndex, totalCount) => {
       const diff = targetIndex - currentIndex;
       const absDiff = Math.abs(diff);
 
       if (absDiff > totalCount / 2) {
-        // Handle wrap-around for shortest path
         if (diff > 0) {
-          return "-100%"; // Move from right to left (shortest path via end)
+          return "-100%";
         } else {
-          return "100%"; // Move from left to right (shortest path via start)
+          return "100%";
         }
       } else {
         if (diff > 0) {
-          return "100%"; // Move from left to right
+          return "100%";
         } else {
-          return "-100%"; // Move from right to left
+          return "-100%";
         }
       }
     },
     []
   );
 
+  const navigationInProgress = useRef(false);
+
   const navigateLightbox = useCallback(
     (direction, specificIndex = null) => {
+      if (navigationInProgress.current) return;
+
       const totalCount = WorkSpaceData.length;
       let newIndex = currentImageIndex;
 
       if (specificIndex !== null) {
+        if (specificIndex === currentImageIndex) return;
         newIndex = specificIndex;
       } else if (direction === "next") {
         newIndex = (currentImageIndex + 1) % totalCount;
@@ -431,60 +455,77 @@ function WorkSpace() {
         newIndex = (currentImageIndex - 1 + totalCount) % totalCount;
       }
 
-      // If already at the target index, do nothing (unless it's an explicit specificIndex click)
       if (newIndex === currentImageIndex && specificIndex === null) {
         return;
       }
 
+      navigationInProgress.current = true;
       setIsImageLoading(true);
+
       const oldImageEl = lightboxImagesRefs.current[currentImageIndex];
       const newImageEl = lightboxImagesRefs.current[newIndex];
 
       if (oldImageEl && newImageEl) {
-        // Determine the animation direction
-        const startXNew = directionFromCurrent(currentImageIndex, newIndex, totalCount);
-        const endXOld = startXNew === "100%" ? "-100%" : "100%"; // Opposite for old image
+        const startXNew = directionFromCurrent(
+          currentImageIndex,
+          newIndex,
+          totalCount
+        );
+        const endXOld = startXNew === "100%" ? "-100%" : "100%";
 
-        // Set initial state for the new image and current image's zIndex
-        gsap.set(newImageEl, { x: startXNew, autoAlpha: 1, zIndex: 10 });
-        gsap.set(oldImageEl, { autoAlpha: 1, zIndex: 5 }); // Old image below new one
+        const img = new Image();
+        img.src = WorkSpaceData[newIndex].image_bg;
+        img.onload = () => {
+          setIsImageLoading(false);
 
-        gsap
-          .timeline({
-            onComplete: () => {
-              // Reset old image after animation
-              gsap.set(oldImageEl, { autoAlpha: 0, x: "0%", zIndex: 1 });
-              // Ensure new image is in its final state
-              gsap.set(newImageEl, { x: "0%", autoAlpha: 1, zIndex: 10 });
-              setCurrentImageIndex(newIndex); // Update state to new index
-              updateThumbnailsHighlight(newIndex); // Update thumbnail highlight
-            },
-          })
-          .to(
-            oldImageEl,
-            { x: endXOld, duration: 0.6, ease: "power2.inOut" },
-            0 // Start at the same time
-          )
-          .to(newImageEl, { x: "0%", duration: 0.6, ease: "power2.inOut" }, 0); // Start at the same time
+          gsap.set(newImageEl, { x: startXNew, autoAlpha: 1, zIndex: 10 });
+          gsap.set(oldImageEl, { autoAlpha: 1, zIndex: 5 });
+
+          gsap
+            .timeline({
+              onComplete: () => {
+                gsap.set(oldImageEl, { autoAlpha: 0, x: "0%", zIndex: 1 });
+                gsap.set(newImageEl, { autoAlpha: 1, x: "0%", zIndex: 10 });
+                setCurrentImageIndex(newIndex);
+                updateThumbnailsHighlight(newIndex);
+                navigationInProgress.current = false;
+              },
+            })
+            .to(
+              oldImageEl,
+              { x: endXOld, duration: 0.6, ease: "power2.inOut" },
+              0
+            )
+            .to(
+              newImageEl,
+              { x: "0%", duration: 0.6, ease: "power2.inOut" },
+              0
+            );
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", img.src);
+          setIsImageLoading(false);
+          navigationInProgress.current = false;
+        };
       } else {
-        setCurrentImageIndex(newIndex); // Fallback if elements not found
+        setCurrentImageIndex(newIndex);
         updateThumbnailsHighlight(newIndex);
+        setIsImageLoading(false);
+        navigationInProgress.current = false;
       }
     },
     [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight]
   );
 
-  // Effect to update thumbnail highlight when lightbox opens or currentImageIndex changes
   useLayoutEffect(() => {
     if (lightboxOpen) {
       updateThumbnailsHighlight(currentImageIndex);
     }
   }, [lightboxOpen, currentImageIndex, updateThumbnailsHighlight]);
 
-  // Keyboard navigation for lightbox
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!isLightboxMounted) return; // Check isLightboxMounted, not lightboxOpen
+      if (!isLightboxMounted) return;
 
       if (event.key === "Escape") {
         closeLightbox();
@@ -497,7 +538,108 @@ function WorkSpace() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isLightboxMounted, closeLightbox, navigateLightbox]); // Dependency updated to isLightboxMounted
+  }, [isLightboxMounted, closeLightbox, navigateLightbox]);
+
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (
+        !isLightboxMounted ||
+        !lightboxRef.current ||
+        !customCursorRef.current
+      ) {
+        setCustomCursorVisible(false);
+        return;
+      }
+
+      const lightboxRect = lightboxRef.current.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      const isWithinLightboxBounds =
+        mouseX >= lightboxRect.left &&
+        mouseX <= lightboxRect.right &&
+        mouseY >= lightboxRect.top &&
+        mouseY <= lightboxRect.bottom;
+
+      if (!isWithinLightboxBounds) {
+        setCustomCursorVisible(false);
+        return;
+      }
+
+      setCustomCursorPosition({ x: mouseX, y: mouseY });
+      setCustomCursorVisible(true);
+
+      const contentRect = lightboxContentRef.current.getBoundingClientRect();
+      const contentThreshold = contentRect.width * 0.2;
+      const relativeMouseX = mouseX - contentRect.left;
+
+      if (relativeMouseX < contentThreshold) {
+        setCustomCursorType("left");
+      } else if (relativeMouseX > contentRect.width - contentThreshold) {
+        setCustomCursorType("right");
+      } else {
+        setCustomCursorType("default");
+      }
+    },
+    [isLightboxMounted]
+  );
+
+  const handleMouseDown = useCallback(
+    (e) => {
+      if (!isLightboxMounted || !lightboxRef.current || isImageLoading) return;
+
+      const contentRect = lightboxContentRef.current.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const relativeMouseX = mouseX - contentRect.left;
+
+      const threshold = contentRect.width * 0.2;
+
+      if (relativeMouseX < threshold) {
+        navigateLightbox("prev");
+      } else if (relativeMouseX > contentRect.width - threshold) {
+        navigateLightbox("next");
+      }
+    },
+    [isLightboxMounted, isImageLoading, navigateLightbox]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    setCustomCursorVisible(false);
+  }, []);
+
+  useEffect(() => {
+    if (isLightboxMounted) {
+      window.addEventListener("mousemove", handleMouseMove);
+      if (lightboxRef.current) {
+        lightboxRef.current.addEventListener("mousedown", handleMouseDown);
+        lightboxRef.current.addEventListener("mouseleave", handleMouseLeave);
+      }
+    } else {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (lightboxRef.current) {
+        lightboxRef.current.removeEventListener("mousedown", handleMouseDown);
+        lightboxRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (lightboxRef.current) {
+        lightboxRef.current.removeEventListener("mousedown", handleMouseDown);
+        lightboxRef.current.removeEventListener("mouseleave", handleMouseLeave);
+      }
+    };
+  }, [isLightboxMounted, handleMouseMove, handleMouseDown, handleMouseLeave]);
+
+  useEffect(() => {
+    if (customCursorRef.current) {
+      if (customCursorVisible) {
+        gsap.to(customCursorRef.current, { autoAlpha: 1, duration: 0.3 });
+      } else {
+        gsap.to(customCursorRef.current, { autoAlpha: 0, duration: 0.3 });
+      }
+    }
+  }, [customCursorVisible]);
 
   return (
     <>
@@ -525,94 +667,82 @@ function WorkSpace() {
       </section>
 
       {isLightboxMounted && (
-  <div
-    className="lightbox-overlay"
-    ref={lightboxRef}
-    onClick={closeLightbox}
-    style={{ opacity: 0, visibility: 'hidden' }}
-  >
-    <div
-      className="lightbox-content"
-      ref={lightboxContentRef}
-      onClick={(e) => e.stopPropagation()}
-    >
-      <button className="lightbox-close" onClick={closeLightbox}>
-        &times;
-      </button>
-      <button
-        className="lightbox-nav lightbox-prev"
-        onClick={() => navigateLightbox("prev")}
-      >
-        &#10094;
-      </button>
+        <div
+          className="lightbox-overlay"
+          ref={lightboxRef}
+          onClick={closeLightbox}
+          style={{ opacity: 0, visibility: "hidden" }}
+        >
+          <div
+            className="lightbox-content"
+            ref={lightboxContentRef}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="lightbox-close" onClick={closeLightbox}>
+              &times;
+            </button>
 
-      {/* Loading Indicator */}
-      {isImageLoading && (
-        <div className="lightbox-loader">
-          <div className="spinner"></div> {/* Basic spinner, style with CSS */}
+            {isImageLoading && (
+              <div className="lightbox-loader">
+                <div className="spinner"></div>
+              </div>
+            )}
+
+            {WorkSpaceData.map((data, index) => (
+              <img
+                key={index}
+                ref={addLightboxImageRef}
+                data-index={index}
+                src={data.image_bg}
+                alt={`Gallery Image ${index + 1}`}
+                className="lightbox-image"
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  transform: "translateX(0%)",
+                  visibility: "hidden",
+                  opacity: 0,
+                  zIndex: 1,
+                }}
+              />
+            ))}
+
+            <div className="lightbox-thumbnails" ref={lightboxThumbnailsRef}>
+              {WorkSpaceData.map((data, index) => (
+                <div
+                  key={index}
+                  ref={addLightboxThumbnailRef}
+                  data-index={index}
+                  className={`lightbox-thumbnail ${
+                    index === currentImageIndex ? "active" : ""
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigateLightbox(null, index);
+                  }}
+                >
+                  <img src={data.image_bg} alt={`Thumbnail ${index + 1}`} />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Render all images for the lightbox, controlled by GSAP */}
-      {WorkSpaceData.map((data, index) => (
-        <img
-          key={index}
-          ref={addLightboxImageRef}
-          data-index={index}
-          src={data.image_bg}
-          alt={`Gallery Image ${index + 1}`}
-          className="lightbox-image"
-          onLoad={() => {
-            if (index === currentImageIndex) {
-              setIsImageLoading(false);
-            }
-          }}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            transform: "translateX(0%)",
-            visibility: "hidden",
-            opacity: 0,
-            zIndex: 1,
-            // Hide the image until it's loaded and it's the current one
-            // display: (index === currentImageIndex && !isImageLoading) ? 'block' : 'none'
-          }}
-        />
-      ))}
-
-      <button
-        className="lightbox-nav lightbox-next"
-        onClick={() => navigateLightbox("next")}
-      >
-        &#10095;
-      </button>
-      <div
-        className="lightbox-thumbnails"
-        ref={lightboxThumbnailsRef}
-      >
-        {WorkSpaceData.map((data, index) => (
-          <div
-            key={index}
-            ref={addLightboxThumbnailRef}
-            data-index={index}
-            className={`lightbox-thumbnail ${
-              index === currentImageIndex ? "active" : ""
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigateLightbox(null, index);
-            }}
-          >
-            <img src={data.image_bg} alt={`Thumbnail ${index + 1}`} />
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)}
+      {isLightboxMounted && (
+        <div
+          ref={customCursorRef}
+          className={`custom-cursor ${customCursorType} ${
+            customCursorVisible ? "active" : ""
+          }`}
+          style={{ left: customCursorPosition.x, top: customCursorPosition.y }}
+        >
+          {customCursorType === "left" && <span>&#10094;</span>}
+          {customCursorType === "right" && <span>&#10095;</span>}
+        </div>
+      )}
     </>
   );
 }

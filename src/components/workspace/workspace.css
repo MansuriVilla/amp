@@ -1,183 +1,36 @@
-.wrokSpace_section{ overflow: hidden; min-height: 100%; }
+.wrokSpace_section { overflow: hidden; min-height: 100%; }
 .work-space--slide-item { position: relative; display: flex; justify-content: center; align-items: center; flex: 0 0 30vw; aspect-ratio: 1.7/1.6; }
-.work-space_items{gap: calc(var(--space) - 20px);}
-.work-space--slide-item img {object-fit: cover;}
-
-
-.wrokSpace_section-top p {max-width: 850px;}
-
-.slide_in-view__images .slide_in-view__image{/* opacity: 0;  */transform: translateX(0%); will-change: transform;}
-
-
-
-
-
-
-
-/* Existing workspace.css styles... */
-
-/* --- Lightbox Styles --- */
-.lightbox-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9); /* Dark overlay */
-    display: flex; /* Initially hidden, will be set to flex by GSAP */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Ensure it's on top */
-    /* opacity: 0; Controlled by GSAP autoAlpha */
-  }
-  
-  .lightbox-content {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff; /* Background for content area, if desired */
-    
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    overflow: hidden; /* Important for image scaling */
-  }
-  
-  .lightbox-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block; /* Remove extra space below image */
-
-  }
-  
-  .lightbox-caption {
-    color: #fff; /* Text color for caption */
-    text-align: center;
-    margin-top: 15px;
-    max-width: 80%;
-    overflow-y: auto; /* If description is long */
-    transform: translateY(20px); /* Initial state for GSAP */
-    opacity: 0; /* Initial state for GSAP */
-  }
-  
-  .lightbox-caption h3 {
-    margin: 0 0 5px 0;
-    font-size: 1.8em;
-    color: #333; /* For caption text against white background */
-  }
-  
-  .lightbox-caption p {
-    margin: 0;
-    font-size: 1em;
-    line-height: 1.5;
-    color: #555; /* For caption text against white background */
-  }
-  
-  .lightbox-close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 2.5em;
-    color: #fff; /* White close button on black overlay */
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 5px 10px;
-    z-index: 1001; /* Above the image */
-    line-height: 1;
-    text-shadow: 0 0 5px rgba(0,0,0,0.5);
-  }
-  
-  .lightbox-close:hover {
-    color: #ccc;
-  }
-  
-  .lightbox-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 3em;
-    color: #fff; /* White navigation arrows on black overlay */
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    z-index: 1001;
-    text-shadow: 0 0 10px rgba(0,0,0,0.8);
-    
-  }
-  
-  .lightbox-nav:hover {
-    color: #ccc;
-  }
-  
-  .lightbox-prev {
-    left: 20px;
-  }
-  
-  .lightbox-next {
-    right: 20px;
-  }
-  
-  /* Adjust for smaller screens */
-  @media (max-width: 768px) {
-    .lightbox-nav {
-      font-size: 2.5em;
-      padding: 5px;
-    }
-    .lightbox-prev {
-      left: 10px;
-    }
-    .lightbox-next {
-      right: 10px;
-    }
-    .lightbox-close {
-      font-size: 2em;
-      top: 5px;
-      right: 10px;
-    }
-    .lightbox-caption {
-      font-size: 0.9em;
-      max-width: 90%;
-    }
-  }
-  
-  /* Ensure the slide_in-view__image is clickable */
-  .work-space--slide-item {
-    cursor: pointer;
-  }
-
-
-  .lightbox-thumbnails {
-    position: absolute;
-    bottom: 50px;
-    right: 50px;
-    display: flex;
-    align-items: baseline;
-    width: 100%;
-    justify-content: flex-end;
-    gap: 15px;
-    z-index: 99999;
-  }
-
-  .lightbox-thumbnail {
-    max-width: 180px;
-    transition: .02s all linear;
-
-  }
-
-  .lightbox-thumbnail img {
-    aspect-ratio: 2/1;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    cursor: pointer;
-    transition: .02s all linear;
-  }
-
-  .lightbox-thumbnail.active {
-    opacity: 1;
-  }
+.work-space_items { gap: calc(var(--space) - 20px); }
+.work-space--slide-item img { object-fit: cover; }
+.wrokSpace_section-top p { max-width: 850px; }
+.slide_in-view__images .slide_in-view__image { transform: translateX(0%); will-change: transform; }
+.lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.lightbox-content { position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #fff; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); overflow: hidden; }
+.lightbox-image { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lightbox-caption { color: #fff; text-align: center; margin-top: 15px; max-width: 80%; overflow-y: auto; transform: translateY(20px); opacity: 0; }
+.lightbox-caption h3 { margin: 0 0 5px 0; font-size: 1.8em; color: #333; }
+.lightbox-caption p { margin: 0; font-size: 1em; line-height: 1.5; color: #555; }
+.lightbox-close { position: absolute; top: 10px; right: 15px; font-size: 2.5em; color: #fff; background: none; border: none; cursor: pointer; padding: 5px 10px; z-index: 1001; line-height: 1; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.lightbox-close:hover { color: #ccc; }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3em; color: #fff; background: none; border: none; cursor: pointer; padding: 10px; z-index: 1001; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
+.lightbox-nav:hover { color: #ccc; }
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }
+.work-space--slide-item { cursor: pointer; }
+.lightbox-thumbnails { position: absolute; bottom: 50px; right: 50px; display: flex; align-items: baseline; width: 100%; justify-content: flex-end; gap: 15px; z-index: 99999; }
+.lightbox-thumbnail { max-width: 100px; transition: .02s all linear; }
+.lightbox-thumbnail img { aspect-ratio: 2/1; height: 100%; width: 100%; object-fit: cover; cursor: pointer; transition: .02s all linear; }
+.lightbox-thumbnail.active { opacity: 1; }
+.hide-cursor { cursor: none !important; }
+.custom-cursor { position: fixed; pointer-events: none; z-index: 999999; width: 70px; height: 70px; background-color: rgba(255, 255, 255, 0.5); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; color: #000; backdrop-filter: blur(5px); transform: translate(-50%, -50%); opacity: 0; transition: width 0.1s ease-out, height 0.1s ease-out, opacity 0.1s ease-out, scale 0.1s ease-out; will-change: transform, opacity, scale; }
+.custom-cursor.active { opacity: 1; }
+.custom-cursor.left { scale: 1.2; }
+.custom-cursor.right { scale: 1.2; }
+.lightbox-nav { display: none; }
+@media (max-width: 768px) {
+ .lightbox-nav { font-size: 2.5em; padding: 5px; }
+.lightbox-prev { left: 10px; }
+.lightbox-next { right: 10px; }
+.lightbox-close { font-size: 2em; top: 5px; right: 10px; }
+.lightbox-caption { font-size: 0.9em; max-width: 90%; }
+ }
