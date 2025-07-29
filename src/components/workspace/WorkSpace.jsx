@@ -54,12 +54,42 @@ function WorkSpace() {
     }
   }, []);
 
+  // Cleanup for CTA triggers (not directly related to slider, but kept)
   useEffect(() => {
     const ctaTriggers = [];
-
     return () => {
       ctaTriggers.forEach((trigger) => trigger.kill());
     };
+  }, []);
+
+  // Define updateThumbnailsHighlight here
+  const updateThumbnailsHighlight = useCallback((index) => {
+    lightboxThumbnailElementsRefs.current.forEach((thumbnail, i) => {
+      if (thumbnail) {
+        if (i === index) {
+          thumbnail.classList.add("active");
+        } else {
+          thumbnail.classList.remove("active");
+        }
+      }
+    });
+
+    // Optional: Scroll the active thumbnail into view
+    const activeThumbnail = lightboxThumbnailElementsRefs.current[index];
+    if (activeThumbnail && lightboxThumbnailsRef.current) {
+      const thumbnailsContainer = lightboxThumbnailsRef.current;
+      const thumbnailRect = activeThumbnail.getBoundingClientRect();
+      const containerRect = thumbnailsContainer.getBoundingClientRect();
+
+      // Check if thumbnail is out of view to the left
+      if (thumbnailRect.left < containerRect.left) {
+        thumbnailsContainer.scrollLeft += (thumbnailRect.left - containerRect.left);
+      }
+      // Check if thumbnail is out of view to the right
+      else if (thumbnailRect.right > containerRect.right) {
+        thumbnailsContainer.scrollLeft += (thumbnailRect.right - containerRect.right);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -68,19 +98,19 @@ function WorkSpace() {
       LERP_FACTOR: 0.05,
     };
     const totalSlideCount = WorkSpaceData.length;
-    const state = {
+    const animationState = {
       currentX: 0,
       targetX: 0,
       slideWidth: 0,
       slides: [],
       isMobile: false,
       animationId: null,
+      isAnimationActive: false,
     };
 
+    // FIX: Changed the mobile detection breakpoint
     const checkMobile = () => {
-      state.isMobile = window.innerWidth < 1000;
-
-      state.slideWidth = state.isMobile ? 175 + 2 * 10 : 350 + 2 * 20;
+      animationState.isMobile = window.innerWidth <= 768; // Adjust this value as needed
     };
 
     const initializeSlides = () => {
@@ -88,7 +118,11 @@ function WorkSpace() {
       if (!track) return;
 
       track.innerHTML = "";
-      state.slides = [];
+      animationState.slides = [];
+      gsap.set(track, { x: 0 });
+      cancelAnimationFrame(animationState.animationId);
+      animationState.isAnimationActive = false;
+
       checkMobile();
 
       const copiesMultiplier = 5;
@@ -105,7 +139,6 @@ function WorkSpace() {
           WorkSpaceData[dataIndex].name
         }" decoding="async" loading="lazy" />
           </div>
-         
         `;
 
         slide.addEventListener("click", () => {
@@ -113,13 +146,22 @@ function WorkSpace() {
         });
 
         track.appendChild(slide);
-        state.slides.push(slide);
+        animationState.slides.push(slide);
+      }
+
+      if (animationState.slides.length > 0) {
+        const firstSlide = animationState.slides[0];
+        const computedStyle = getComputedStyle(firstSlide);
+        const marginRight = parseFloat(computedStyle.marginRight);
+        animationState.slideWidth = firstSlide.offsetWidth + marginRight;
+      } else {
+        animationState.slideWidth = 0;
       }
 
       const initialOffset =
-        totalSlideCount * state.slideWidth * Math.floor(copiesMultiplier / 2);
-      state.currentX = -initialOffset;
-      state.targetX = -initialOffset;
+        totalSlideCount * animationState.slideWidth * Math.floor(copiesMultiplier / 2);
+      animationState.currentX = -initialOffset;
+      animationState.targetX = -initialOffset;
       updateSlidePositions();
     };
 
@@ -127,28 +169,36 @@ function WorkSpace() {
       const track = sliderRef.current;
       if (!track) return;
 
-      const sequenceWidth = totalSlideCount * state.slideWidth;
+      const sequenceWidth = totalSlideCount * animationState.slideWidth;
 
-      if (
-        state.currentX <
-        -sequenceWidth * (Math.floor(WorkSpaceData.length / 2) + 1)
-      ) {
-        state.currentX += sequenceWidth;
-        state.targetX += sequenceWidth;
-      } else if (
-        state.currentX >
-        -sequenceWidth * Math.floor(WorkSpaceData.length / 2)
-      ) {
-        state.currentX -= sequenceWidth;
-        state.targetX -= sequenceWidth;
+      if (sequenceWidth === 0) {
+        return;
       }
 
-      track.style.transform = `translate3d(${state.currentX}px, 0, 0)`;
+      const middleSequenceIndex = Math.floor(WorkSpaceData.length / 2);
+      const minX = -sequenceWidth * (middleSequenceIndex + 1.5);
+      const maxX = -sequenceWidth * (middleSequenceIndex - 0.5);
+
+      if (animationState.currentX < minX) {
+        animationState.currentX += sequenceWidth;
+        animationState.targetX += sequenceWidth;
+      } else if (animationState.currentX > maxX) {
+        animationState.currentX -= sequenceWidth;
+        animationState.targetX -= sequenceWidth;
+      }
+
+      if (animationState.isAnimationActive) {
+        track.style.transform = `translate3d(${animationState.currentX}px, 0, 0)`;
+      } else {
+        gsap.set(track, { x: 0 });
+      }
     };
 
     const updateParallax = () => {
+      if (!animationState.isAnimationActive) return;
+
       const viewportCenter = window.innerWidth / 2;
-      state.slides.forEach((slide) => {
+      animationState.slides.forEach((slide) => {
         const img = slide.querySelector(".item_bg img");
         if (!img) return;
 
@@ -168,11 +218,13 @@ function WorkSpace() {
     };
 
     const animate = () => {
-      state.currentX += (state.targetX - state.currentX) * config.LERP_FACTOR;
-      state.targetX -= config.SCROLL_SPEED;
+      if (!animationState.isAnimationActive) return;
+      animationState.currentX +=
+        (animationState.targetX - animationState.currentX) * config.LERP_FACTOR;
+      animationState.targetX -= config.SCROLL_SPEED;
       updateSlidePositions();
       updateParallax();
-      state.animationId = requestAnimationFrame(animate);
+      animationState.animationId = requestAnimationFrame(animate);
     };
 
     const setupScrollTrigger = () => {
@@ -184,12 +236,27 @@ function WorkSpace() {
         return;
       }
 
+      if (mainScrollTrigger.current) {
+        mainScrollTrigger.current.kill(true);
+        mainScrollTrigger.current = null;
+      }
+
+      checkMobile();
+      // if (animationState.isMobile) {
+      //   initializeSlides(); // Re-initialize slides for mobile (without continuous animation)
+      //   gsap.set(sliderRef.current, { x: 0 }); // Ensure slider is reset for mobile
+      //   animationState.isAnimationActive = false; // Explicitly disable animation
+      //   cancelAnimationFrame(animationState.animationId); // Stop any ongoing animation
+      //   console.log("Mobile detected, animation disabled.");
+      //   return;
+      // }
+
       mainScrollTrigger.current = ScrollTrigger.create({
         trigger: container,
         start: "top 80%",
-        
         onEnter: () => {
           initializeSlides();
+          animationState.isAnimationActive = true;
           animate();
 
           gsap.fromTo(
@@ -213,65 +280,45 @@ function WorkSpace() {
           );
         },
         onLeaveBack: () => {
-          if (state.animationId) {
-            cancelAnimationFrame(state.animationId);
-            state.animationId = null;
+          animationState.isAnimationActive = false;
+          if (animationState.animationId) {
+            cancelAnimationFrame(animationState.animationId);
+            animationState.animationId = null;
           }
-
           gsap.set(".slide_in-view__images .work-space--slide-item", {
             pointerEvents: "none",
           });
+          gsap.to(sliderRef.current, { x: 0, duration: 0.5, ease: "power2.out" });
         },
       });
       ScrollTrigger.refresh();
     };
 
+    const handleResize = () => {
+      setupScrollTrigger();
+      if (animationState.isMobile) {
+        gsap.set(sliderRef.current, { x: 0 }); // Ensures it's reset on resize if mobile
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
+    // Initial setup
     setupScrollTrigger();
-    window.addEventListener("resize", () => {
-      ScrollTrigger.refresh();
-      initializeSlides();
-    });
 
     return () => {
-      window.removeEventListener("resize", () => {
-        ScrollTrigger.refresh();
-        initializeSlides();
-      });
-      if (state.animationId) {
-        cancelAnimationFrame(state.animationId);
+      window.removeEventListener("resize", handleResize);
+      if (animationState.animationId) {
+        cancelAnimationFrame(animationState.animationId);
       }
       if (mainScrollTrigger.current) {
-        mainScrollTrigger.current.kill();
+        mainScrollTrigger.current.kill(true);
         mainScrollTrigger.current = null;
       }
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (
-          trigger.trigger &&
-          trigger.trigger.classList &&
-          trigger.trigger.classList.contains("slide_in-view__row")
-        ) {
-          trigger.kill();
-        }
-      });
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, []);
+  }, []); // No need for updateThumbnailsHighlight here, it's defined and used in other effects/callbacks
 
-  const updateThumbnailsHighlight = useCallback((index) => {
-    if (lightboxThumbnailElementsRefs.current.length > 0) {
-      lightboxThumbnailElementsRefs.current.forEach((thumb, i) => {
-        if (i === index) {
-          thumb.classList.add("active");
-          thumb.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-            inline: "center",
-          });
-        } else {
-          thumb.classList.remove("active");
-        }
-      });
-    }
-  }, []);
+  // ... (rest of your component code - lightbox logic, etc. - remains the same)
 
   useEffect(() => {
     if (lightboxOpen) {
@@ -330,6 +377,7 @@ function WorkSpace() {
         duration: 0.5,
         ease: "power2.out",
         onComplete: () => {
+          // Now updateThumbnailsHighlight is defined
           updateThumbnailsHighlight(currentImageIndex);
         },
       });
@@ -378,7 +426,7 @@ function WorkSpace() {
         );
       }
     }
-  }, [lightboxOpen, isLightboxMounted]);
+  }, [lightboxOpen, isLightboxMounted, currentImageIndex, updateThumbnailsHighlight]); // Added updateThumbnailsHighlight here
 
   const openLightbox = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -462,7 +510,7 @@ function WorkSpace() {
                 gsap.set(oldImageEl, { autoAlpha: 0, x: "0%", zIndex: 1 });
                 gsap.set(newImageEl, { autoAlpha: 1, x: "0%", zIndex: 10 });
                 setCurrentImageIndex(newIndex);
-                updateThumbnailsHighlight(newIndex);
+                updateThumbnailsHighlight(newIndex); // Now updateThumbnailsHighlight is defined
                 navigationInProgress.current = false;
               },
             })
@@ -484,19 +532,19 @@ function WorkSpace() {
         };
       } else {
         setCurrentImageIndex(newIndex);
-        updateThumbnailsHighlight(newIndex);
+        updateThumbnailsHighlight(newIndex); // Now updateThumbnailsHighlight is defined
         setIsImageLoading(false);
         navigationInProgress.current = false;
       }
     },
-    [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight]
+    [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight] // Dependencies
   );
 
   useLayoutEffect(() => {
     if (lightboxOpen) {
-      updateThumbnailsHighlight(currentImageIndex);
+      updateThumbnailsHighlight(currentImageIndex); // Now updateThumbnailsHighlight is defined
     }
-  }, [lightboxOpen, currentImageIndex, updateThumbnailsHighlight]);
+  }, [lightboxOpen, currentImageIndex, updateThumbnailsHighlight]); // Dependencies
 
   useEffect(() => {
     const handleKeyDown = (event) => {

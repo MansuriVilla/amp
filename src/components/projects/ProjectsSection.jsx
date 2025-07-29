@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function ProjectsSection() {
   const itemsRef = useRef([]);
+  const ctaRefs = useRef([]); // New ref for CTA buttons
   const sliderRef = useRef(null);
   const projectSectionBottomRef = useRef(null);
   const mainScrollTrigger = useRef(null); // Keep this ref for easy cleanup
@@ -40,6 +41,12 @@ function ProjectsSection() {
           // Manually ensure pin-spacing is removed if needed by your CSS
           // For example, if you add a class based on pinning, remove it here.
         }
+        // Reset CTA button styles as well for mobile
+        ctaRefs.current.forEach((cta) => {
+          if (cta) {
+            gsap.set(cta, { y: 0, opacity: 1 }); // Ensure CTAs are visible on mobile
+          }
+        });
         return; // Exit if on mobile, no animations
       }
 
@@ -48,7 +55,10 @@ function ProjectsSection() {
         const totalContentWidth = slider.scrollWidth;
         const visibleContainerWidth = slider.clientWidth;
         // Ensure scrollableDistance is not negative if content is smaller than container
-        const scrollableDistance = Math.max(0, totalContentWidth - visibleContainerWidth);
+        const scrollableDistance = Math.max(
+          0,
+          totalContentWidth - visibleContainerWidth
+        );
 
         // Calculate startXPercent dynamically if needed, or keep it fixed
         const startXPercent = 5;
@@ -72,11 +82,16 @@ function ProjectsSection() {
           },
         });
       }
+
+      
     };
 
     // Initial setup
     setupAnimations();
 
+
+
+    
     // Re-setup animations on resize
     window.addEventListener("resize", setupAnimations);
 
@@ -138,6 +153,52 @@ function ProjectsSection() {
     itemsRef.current[index] = el;
   };
 
+  // New function to set ref for CTA buttons
+  const setCtaRef = (el, index) => {
+    ctaRefs.current[index] = el;
+  };
+
+  useEffect(() => {
+    if (!mainScrollTrigger.current) {
+      return;
+    }
+
+    const slideItems = document.querySelectorAll(".slide-item");
+
+    slideItems.forEach((slideItem) => {
+      const cta = slideItem.querySelector(".project_cta");
+
+      if (cta) {
+        gsap.set(cta, { y: 20, opacity: 0 });
+
+        gsap.to(cta, {
+          y: 0,
+          opacity: 1,
+          ease: "power1.out",
+          scrollTrigger: {
+            trigger: slideItem,
+            start: "left 60%",
+            end: "left 60%",
+            containerAnimation: mainScrollTrigger.current,
+            toggleActions: "play none none reverse",
+            scrub: true,
+            // markers: true,
+          },
+        });
+      }
+    });
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => {
+        if (trigger.trigger && trigger.trigger.classList && trigger.trigger.classList.contains('slide-item')) {
+          trigger.kill();
+        }
+      });
+    };
+  }, [mainScrollTrigger.current]);
+
+
+  
   return (
     <>
       <section className="projects_section" ref={projectSectionBottomRef}>
@@ -171,6 +232,7 @@ function ProjectsSection() {
                         href="javascript:void(0);"
                         onClick={() => handleCardClick(data)}
                         className="project_cta"
+                        ref={(el) => setCtaRef(el, index)}
                       >
                         {data.button_text}
                       </a>
@@ -198,8 +260,8 @@ function ProjectsSection() {
                   >
                     {" "}
                     <path
-                      fillRule="evenodd" // Changed fill-rule to fillRule for React compatibility
-                      clipRule="evenodd"   // Changed clip-rule to clipRule for React compatibility
+                      fillRule="evenodd"
+                      clipRule="evenodd"
                       d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z"
                       fill="#fff"
                     />{" "}
