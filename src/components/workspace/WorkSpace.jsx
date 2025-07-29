@@ -83,11 +83,11 @@ function WorkSpace() {
 
       // Check if thumbnail is out of view to the left
       if (thumbnailRect.left < containerRect.left) {
-        thumbnailsContainer.scrollLeft += (thumbnailRect.left - containerRect.left);
+        thumbnailsContainer.scrollLeft += thumbnailRect.left - containerRect.left;
       }
       // Check if thumbnail is out of view to the right
       else if (thumbnailRect.right > containerRect.right) {
-        thumbnailsContainer.scrollLeft += (thumbnailRect.right - containerRect.right);
+        thumbnailsContainer.scrollLeft += thumbnailRect.right - containerRect.right;
       }
     }
   }, []);
@@ -108,7 +108,6 @@ function WorkSpace() {
       isAnimationActive: false,
     };
 
-    // FIX: Changed the mobile detection breakpoint
     const checkMobile = () => {
       animationState.isMobile = window.innerWidth <= 768; // Adjust this value as needed
     };
@@ -242,14 +241,6 @@ function WorkSpace() {
       }
 
       checkMobile();
-      // if (animationState.isMobile) {
-      //   initializeSlides(); // Re-initialize slides for mobile (without continuous animation)
-      //   gsap.set(sliderRef.current, { x: 0 }); // Ensure slider is reset for mobile
-      //   animationState.isAnimationActive = false; // Explicitly disable animation
-      //   cancelAnimationFrame(animationState.animationId); // Stop any ongoing animation
-      //   console.log("Mobile detected, animation disabled.");
-      //   return;
-      // }
 
       mainScrollTrigger.current = ScrollTrigger.create({
         trigger: container,
@@ -297,7 +288,7 @@ function WorkSpace() {
     const handleResize = () => {
       setupScrollTrigger();
       if (animationState.isMobile) {
-        gsap.set(sliderRef.current, { x: 0 }); // Ensures it's reset on resize if mobile
+        gsap.set(sliderRef.current, { x: 0 }); 
       }
     };
     window.addEventListener("resize", handleResize);
@@ -316,9 +307,7 @@ function WorkSpace() {
       }
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, []); // No need for updateThumbnailsHighlight here, it's defined and used in other effects/callbacks
-
-  // ... (rest of your component code - lightbox logic, etc. - remains the same)
+  }, []);
 
   useEffect(() => {
     if (lightboxOpen) {
@@ -331,32 +320,15 @@ function WorkSpace() {
           autoAlpha: 0,
           zIndex: 1,
           x: "0%",
-          scale: 1,
+          scale: 1, // Ensure scale is reset for all images
         });
       });
 
-      if (lightboxImagesRefs.current[currentImageIndex]) {
-        const img = new Image();
-        img.src = WorkSpaceData[currentImageIndex].image_bg;
-        img.onload = () => {
-          setIsImageLoading(false);
-          gsap.fromTo(
-            lightboxImagesRefs.current[currentImageIndex],
-            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
-            {
-              scale: 1,
-              autoAlpha: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-              delay: 0.1,
-            }
-          );
-        };
-        img.onerror = () => {
-          console.error("Failed to load image:", img.src);
-          setIsImageLoading(false);
-        };
-      }
+      gsap.to(lightboxRef.current, {
+        autoAlpha: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
 
       gsap.fromTo(
         lightboxThumbnailElementsRefs.current,
@@ -371,16 +343,7 @@ function WorkSpace() {
           delay: 0.2,
         }
       );
-
-      gsap.to(lightboxRef.current, {
-        autoAlpha: 1,
-        duration: 0.5,
-        ease: "power2.out",
-        onComplete: () => {
-          // Now updateThumbnailsHighlight is defined
-          updateThumbnailsHighlight(currentImageIndex);
-        },
-      });
+      // updateThumbnailsHighlight(currentImageIndex); // This will be called by useLayoutEffect
     } else if (isLightboxMounted) {
       const tl = gsap.timeline({
         onComplete: () => {
@@ -389,6 +352,7 @@ function WorkSpace() {
           document.body.classList.remove("hide-cursor");
           setCustomCursorVisible(false);
 
+          // Ensure all images are completely hidden after closing
           lightboxImagesRefs.current.forEach((imgEl) => {
             gsap.set(imgEl, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
           });
@@ -410,6 +374,7 @@ function WorkSpace() {
         );
       }
 
+      // Animate out the currently visible image when closing
       if (lightboxImagesRefs.current[currentImageIndex]) {
         tl.to(
           lightboxImagesRefs.current[currentImageIndex],
@@ -426,12 +391,50 @@ function WorkSpace() {
         );
       }
     }
-  }, [lightboxOpen, isLightboxMounted, currentImageIndex, updateThumbnailsHighlight]); // Added updateThumbnailsHighlight here
+  }, [lightboxOpen, isLightboxMounted]); // Removed currentImageIndex from dependencies
+
+  // New useEffect to handle image display and loading when currentImageIndex changes
+  // This useEffect will now manage ONLY the transition of the main image within the lightbox
+  useEffect(() => {
+    if (lightboxOpen && isLightboxMounted && !navigationInProgress.current) {
+      setIsImageLoading(true);
+
+      const newImageEl = lightboxImagesRefs.current[currentImageIndex];
+      if (newImageEl) {
+        const img = new Image();
+        img.src = WorkSpaceData[currentImageIndex].image_bg;
+        img.onload = () => {
+          setIsImageLoading(false);
+          // Ensure other images are hidden
+          lightboxImagesRefs.current.forEach((imgEl, idx) => {
+            if (idx !== currentImageIndex) {
+              gsap.set(imgEl, { autoAlpha: 0, zIndex: 1, x: "0%", scale: 1 });
+            }
+          });
+          // Animate in the current image
+          gsap.fromTo(
+            newImageEl,
+            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              delay: 0.1,
+            }
+          );
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", img.src);
+          setIsImageLoading(false);
+        };
+      }
+    }
+  }, [currentImageIndex, lightboxOpen, isLightboxMounted]); // Dependencies for image display
 
   const openLightbox = useCallback((index) => {
     setCurrentImageIndex(index);
     setLightboxOpen(true);
-    setIsImageLoading(true);
   }, []);
 
   const closeLightbox = useCallback(() => {
@@ -501,8 +504,9 @@ function WorkSpace() {
         img.onload = () => {
           setIsImageLoading(false);
 
-          gsap.set(newImageEl, { x: startXNew, autoAlpha: 1, zIndex: 10 });
-          gsap.set(oldImageEl, { autoAlpha: 1, zIndex: 5 });
+          // Set initial states for transition
+          gsap.set(newImageEl, { x: startXNew, autoAlpha: 1, zIndex: 10, scale: 1 }); // Ensure scale is 1
+          gsap.set(oldImageEl, { autoAlpha: 1, zIndex: 5, scale: 1 }); // Ensure scale is 1
 
           gsap
             .timeline({
@@ -510,7 +514,7 @@ function WorkSpace() {
                 gsap.set(oldImageEl, { autoAlpha: 0, x: "0%", zIndex: 1 });
                 gsap.set(newImageEl, { autoAlpha: 1, x: "0%", zIndex: 10 });
                 setCurrentImageIndex(newIndex);
-                updateThumbnailsHighlight(newIndex); // Now updateThumbnailsHighlight is defined
+                updateThumbnailsHighlight(newIndex);
                 navigationInProgress.current = false;
               },
             })
@@ -531,20 +535,21 @@ function WorkSpace() {
           navigationInProgress.current = false;
         };
       } else {
+        // Fallback if elements are not found, though they should be with the refs
         setCurrentImageIndex(newIndex);
-        updateThumbnailsHighlight(newIndex); // Now updateThumbnailsHighlight is defined
+        updateThumbnailsHighlight(newIndex);
         setIsImageLoading(false);
         navigationInProgress.current = false;
       }
     },
-    [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight] // Dependencies
+    [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight]
   );
 
   useLayoutEffect(() => {
-    if (lightboxOpen) {
-      updateThumbnailsHighlight(currentImageIndex); // Now updateThumbnailsHighlight is defined
+    if (lightboxOpen && isLightboxMounted) { // Ensure lightbox is open and mounted for thumbnail update
+      updateThumbnailsHighlight(currentImageIndex);
     }
-  }, [lightboxOpen, currentImageIndex, updateThumbnailsHighlight]); // Dependencies
+  }, [lightboxOpen, currentImageIndex, isLightboxMounted, updateThumbnailsHighlight]); // Added isLightboxMounted
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -726,8 +731,8 @@ function WorkSpace() {
                   width: "100%",
                   height: "100%",
                   transform: "translateX(0%)",
-                  visibility: "hidden",
-                  opacity: 0,
+                  visibility: "hidden", // Hidden by default, animated by GSAP
+                  opacity: 0, // Hidden by default, animated by GSAP
                   zIndex: 1,
                 }}
               />

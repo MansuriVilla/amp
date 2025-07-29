@@ -17,7 +17,7 @@
 .lightbox-prev { left: 20px; }
 .lightbox-next { right: 20px; }
 .work-space--slide-item { cursor: pointer; }
-.lightbox-thumbnails { position: absolute; bottom: 50px; right: 50px; display: flex; align-items: baseline; width: 100%; justify-content: flex-end; gap: 15px; z-index: 99999; }
+.lightbox-thumbnails { position: absolute; bottom:0; padding: 0 clamp(20px,4vw,50px) clamp(20px,4vw,50px) clamp(20px,4vw,50px); display: flex; align-items: baseline; width: 100%; justify-content: flex-end; gap: 15px; z-index: 99999; }
 .lightbox-thumbnail { max-width: 100px; transition: .02s all linear; }
 .lightbox-thumbnail img { aspect-ratio: 2/1; height: 100%; width: 100%; object-fit: cover; cursor: pointer; transition: .02s all linear; }
 .lightbox-thumbnail.active { opacity: 1; }
