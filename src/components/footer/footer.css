@@ -15,9 +15,9 @@ footer { margin-bottom: 20px; }
 .footer_email span:not(span.anchor_hover) { display: flex; position: relative; height: 36px; width: 36px; overflow: hidden; justify-content: center; align-items: center }
 .copyright_text { font-size: 16px; font-weight: 600; }
 @media (max-width:768px) {
- .footer_main { flex-direction: column; gap: 30px; position: relative; }
+ .footer_main { flex-direction: column; gap: 60px; position: relative; }
 .footer_left-inner { gap: 30px; }
 .footer_right-inner { max-width: 100%; }
 .copyright_text { position: absolute; bottom: 0; }
-.footer_right-bottom.site_gap { gap: 20px; margin-bottom: 30px; }
+.footer_right-bottom.site_gap { gap: 20px; margin-bottom: 60px; }
  }
