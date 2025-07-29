@@ -187,7 +187,7 @@ function WorkSpace() {
       mainScrollTrigger.current = ScrollTrigger.create({
         trigger: container,
         start: "top 80%",
-        markers: true,
+        
         onEnter: () => {
           initializeSlides();
           animate();
