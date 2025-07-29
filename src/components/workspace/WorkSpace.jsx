@@ -55,29 +55,7 @@ function WorkSpace() {
   }, []);
 
   useEffect(() => {
-    const slideItems = document.querySelectorAll(".work-space--slide-item");
     const ctaTriggers = [];
-
-    slideItems.forEach((slideItem) => {
-      const cta = slideItem.querySelector(".wrokSpace_cta");
-
-      if (cta) {
-        gsap.set(cta, { y: 20, opacity: 0 });
-
-        const ctaTrigger = ScrollTrigger.create({
-          trigger: slideItem,
-          start: "left center",
-          end: "left 20%",
-          toggleActions: "play none none reverse",
-          animation: gsap.to(cta, {
-            y: 0,
-            opacity: 1,
-            ease: "power1.out",
-          }),
-        });
-        ctaTriggers.push(ctaTrigger);
-      }
-    });
 
     return () => {
       ctaTriggers.forEach((trigger) => trigger.kill());
@@ -127,11 +105,7 @@ function WorkSpace() {
           WorkSpaceData[dataIndex].name
         }" decoding="async" loading="lazy" />
           </div>
-          ${
-            WorkSpaceData[dataIndex].cta_text
-              ? `<div class="wrokSpace_cta">${WorkSpaceData[dataIndex].cta_text}</div>`
-              : ""
-          }
+         
         `;
 
         slide.addEventListener("click", () => {
@@ -213,6 +187,7 @@ function WorkSpace() {
       mainScrollTrigger.current = ScrollTrigger.create({
         trigger: container,
         start: "top 80%",
+        markers: true,
         onEnter: () => {
           initializeSlides();
           animate();
