@@ -70,7 +70,7 @@ function App() {
               start: "top 50%",
               // end: "+=" + revealSection.offsetHeight * 3.5,
               end: "bottom 50%",
-              markers:true,
+              // markers:true,
               toggleActions: "play reverse play reverse",
             },
           }
