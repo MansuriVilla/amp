@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Footer from "./components/footer/Footer";
 import VideoBanner from "./components/video-banner/VideoBanner.jsx";
 import AboutUs from "./components/about-us/AboutUs.jsx";
-// import ProjectsSection from "./components/projects/ProjectsSection";
+import ProjectsSection from "./components/projects/ProjectsSection";
 import WorkSpace from "./components/workspace/WorkSpace.jsx";
 import Review from "./components/review/Review.jsx";
 import Contact from "./components/contact/Contact.jsx";
@@ -84,7 +84,7 @@ function App() {
       <main className="main_content site_flex flex_column site_gap">
         <VideoBanner />
         <AboutUs /> 
-        {/* <ProjectsSection /> */}
+        <ProjectsSection />
         <WorkSpace />
         <Review />
         <Contact />
