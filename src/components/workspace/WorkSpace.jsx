@@ -16,6 +16,7 @@ function WorkSpace() {
   const sectionRef = useRef(null);
   const sliderRef = useRef(null);
   const mainScrollTrigger = useRef(null);
+  const hasInitiallyAnimated = useRef(false); // Add this line
 
   // ... (Lightbox and Custom Cursor states and refs remain the same)
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -327,7 +328,7 @@ function WorkSpace() {
       const slideRect = slide.getBoundingClientRect();
 
       if (slideRect.right < 0 || slideRect.left > window.innerWidth) {
-        img.style.transform = "scale(1.8) translateX(0px)";
+        img.style.transform = "scale(1.6) translateX(0px)";
         return;
       }
 
@@ -335,7 +336,7 @@ function WorkSpace() {
       const distanceFromCenter = slideCenter - viewportCenter;
       const parallaxOffset = distanceFromCenter * -0.25;
 
-      img.style.transform = `translateX(${parallaxOffset}px) scale(1.8)`;
+      img.style.transform = `translateX(${parallaxOffset}px) scale(1.6)`;
     });
   }, []);
 
@@ -354,7 +355,6 @@ function WorkSpace() {
     animationState.current.animationId = requestAnimationFrame(animate);
   }, [updateParallax, updateSlidePositions]);
 
-  // Setup ScrollTrigger (should manage start/stop of the *already initialized* animation)
   const setupScrollTrigger = useCallback(() => {
     const container = document.querySelector(
       ".slide_in-view__container .slide_in-view__row"
@@ -373,8 +373,14 @@ function WorkSpace() {
       trigger: container,
       start: "top 80%",
       onEnter: () => {
+        // Start or resume the continuous loop immediately
+        if (!animationState.current.isAnimationActive) {
+          animationState.current.isAnimationActive = true;
+          animate();
+        }
+  
+        // Run initial animation only the first time
         if (!hasInitiallyAnimated.current) {
-          // Run initial animation only the first time
           gsap.fromTo(
             ".slide_in-view__images .work-space--slide-item",
             {
@@ -393,18 +399,14 @@ function WorkSpace() {
                   x: "0%", // Reset individual slide transforms
                 });
                 hasInitiallyAnimated.current = true;
-                // Start the continuous loop after initial animation
-                animationState.current.isAnimationActive = true;
-                animate();
               },
             }
           );
         } else {
-          // On subsequent enters, just resume the loop
-          if (!animationState.current.isAnimationActive) {
-            animationState.current.isAnimationActive = true;
-            animate();
-          }
+          // Ensure pointer events are enabled on subsequent enters
+          gsap.set(".slide_in-view__images .work-space--slide-item", {
+            pointerEvents: "auto",
+          });
         }
       },
       onLeaveBack: () => {
@@ -415,7 +417,6 @@ function WorkSpace() {
         gsap.set(".slide_in-view__images .work-space--slide-item", {
           pointerEvents: "none",
         });
-        // Removed: gsap.to(sliderRef.current, { x: 0, ... })
       },
     });
     ScrollTrigger.refresh();
