@@ -1,6 +1,6 @@
 .projects_section { min-height: clamp(30vh, 20vw, 100vh); }
 .projects_section-inner.site_gap { gap: 30px; }
-.slide-item { position: relative; display: flex; justify-content: center; align-items: center; flex: 0 0 61vw; height: 100%; aspect-ratio: 16/9.3; }
+.slide-item { position: relative; display: flex; justify-content: center; align-items: center; flex: 0 0 61vw; height: 100%; width: 100%; aspect-ratio: 16/9.3; }
 .item_content::before { content: ''; position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: #00000060; z-index: 0; display: flex; }
 .item_bg { width: 100%; height: 100%; display: flex; overflow: hidden; }
 .item_bg img { width: 100%; object-fit: cover; }
