@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
 import Footer from "./components/footer/Footer";
 import VideoBanner from "./components/video-banner/VideoBanner.jsx";
 import AboutUs from "./components/about-us/AboutUs.jsx";

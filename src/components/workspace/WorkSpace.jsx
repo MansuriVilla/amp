@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 function WorkSpace() {
   const sectionRef = useRef(null);
-  const sliderRef = useRef(null);
+  const sliderRef = useRef(null); // This is imagesContainer in the new code
   const mainScrollTrigger = useRef(null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -92,348 +92,14 @@ function WorkSpace() {
     }
   }, []);
 
-  useEffect(() => {
-    const config = {
-      SCROLL_SPEED: 1.5,
-      LERP_FACTOR: 0.05,
-    };
-    const totalSlideCount = WorkSpaceData.length;
-    const animationState = {
-      currentX: 0,
-      targetX: 0,
-      slideWidth: 0,
-      slides: [],
-      isMobile: false,
-      animationId: null,
-      isAnimationActive: false,
-    };
+  // Animation state for the slider, now simplified for the new loop method
+  const animationState = useRef({
+    slideWidth: 0,
+    isSliderInitialized: false, // Track if slider has been initialized
+    sequenceWidth: 0, // NEW: Store the width of one full sequence of original slides
+  });
 
-    const checkMobile = () => {
-      animationState.isMobile = window.innerWidth <= 768; // Adjust this value as needed
-    };
-
-    const initializeSlides = () => {
-      const track = sliderRef.current;
-      if (!track) return;
-
-      track.innerHTML = "";
-      animationState.slides = [];
-      gsap.set(track, { x: 0 });
-      cancelAnimationFrame(animationState.animationId);
-      animationState.isAnimationActive = false;
-
-      checkMobile();
-
-      const copiesMultiplier = 5;
-      const totalSlidesInTrack = totalSlideCount * copiesMultiplier;
-
-      for (let i = 0; i < totalSlidesInTrack; i++) {
-        const dataIndex = i % totalSlideCount;
-        const slide = document.createElement("div");
-        slide.className = "work-space--slide-item slide_in-view__image";
-        slide.dataset.index = dataIndex;
-        slide.innerHTML = `
-          <div class="item_bg">
-            <img src="${WorkSpaceData[dataIndex].image_bg}" alt="${
-          WorkSpaceData[dataIndex].name
-        }" decoding="async" loading="lazy" />
-          </div>
-        `;
-
-        slide.addEventListener("click", () => {
-          openLightbox(dataIndex);
-        });
-
-        track.appendChild(slide);
-        animationState.slides.push(slide);
-      }
-
-      if (animationState.slides.length > 0) {
-        const firstSlide = animationState.slides[0];
-        const computedStyle = getComputedStyle(firstSlide);
-        const marginRight = parseFloat(computedStyle.marginRight);
-        animationState.slideWidth = firstSlide.offsetWidth + marginRight;
-      } else {
-        animationState.slideWidth = 0;
-      }
-
-      const initialOffset =
-        totalSlideCount * animationState.slideWidth * Math.floor(copiesMultiplier / 2);
-      animationState.currentX = -initialOffset;
-      animationState.targetX = -initialOffset;
-      updateSlidePositions();
-    };
-
-    const updateSlidePositions = () => {
-      const track = sliderRef.current;
-      if (!track) return;
-
-      const sequenceWidth = totalSlideCount * animationState.slideWidth;
-
-      if (sequenceWidth === 0) {
-        return;
-      }
-
-      const middleSequenceIndex = Math.floor(WorkSpaceData.length / 2);
-      const minX = -sequenceWidth * (middleSequenceIndex + 1.5);
-      const maxX = -sequenceWidth * (middleSequenceIndex - 0.5);
-
-      if (animationState.currentX < minX) {
-        animationState.currentX += sequenceWidth;
-        animationState.targetX += sequenceWidth;
-      } else if (animationState.currentX > maxX) {
-        animationState.currentX -= sequenceWidth;
-        animationState.targetX -= sequenceWidth;
-      }
-
-      if (animationState.isAnimationActive) {
-        track.style.transform = `translate3d(${animationState.currentX}px, 0, 0)`;
-      } else {
-        gsap.set(track, { x: 0 });
-      }
-    };
-
-    const updateParallax = () => {
-      if (!animationState.isAnimationActive) return;
-
-      const viewportCenter = window.innerWidth / 2;
-      animationState.slides.forEach((slide) => {
-        const img = slide.querySelector(".item_bg img");
-        if (!img) return;
-
-        const slideRect = slide.getBoundingClientRect();
-
-        if (slideRect.right < 0 || slideRect.left > window.innerWidth) {
-          img.style.transform = "scale(1.8) translateX(0px)";
-          return;
-        }
-
-        const slideCenter = slideRect.left + slideRect.width / 2;
-        const distanceFromCenter = slideCenter - viewportCenter;
-        const parallaxOffset = distanceFromCenter * -0.25;
-
-        img.style.transform = `translateX(${parallaxOffset}px) scale(1.8)`;
-      });
-    };
-
-    const animate = () => {
-      if (!animationState.isAnimationActive) return;
-      animationState.currentX +=
-        (animationState.targetX - animationState.currentX) * config.LERP_FACTOR;
-      animationState.targetX -= config.SCROLL_SPEED;
-      updateSlidePositions();
-      updateParallax();
-      animationState.animationId = requestAnimationFrame(animate);
-    };
-
-    const setupScrollTrigger = () => {
-      const container = document.querySelector(
-        ".slide_in-view__container .slide_in-view__row"
-      );
-      if (!container || !sliderRef.current) {
-        console.warn("Slide-in view elements not found");
-        return;
-      }
-
-      if (mainScrollTrigger.current) {
-        mainScrollTrigger.current.kill(true);
-        mainScrollTrigger.current = null;
-      }
-
-      checkMobile();
-
-      mainScrollTrigger.current = ScrollTrigger.create({
-        trigger: container,
-        start: "top 80%",
-        onEnter: () => {
-          initializeSlides();
-          animationState.isAnimationActive = true;
-          animate();
-
-          gsap.fromTo(
-            ".slide_in-view__images .work-space--slide-item",
-            {
-              opacity: 0,
-              x: "100%",
-            },
-            {
-              opacity: 1,
-              x: "0%",
-              duration: 1.6,
-              stagger: 0.1,
-              ease: "power4.out",
-              onComplete: () => {
-                gsap.set(".slide_in-view__images .work-space--slide-item", {
-                  pointerEvents: "auto",
-                });
-              },
-            }
-          );
-        },
-        onLeaveBack: () => {
-          animationState.isAnimationActive = false;
-          if (animationState.animationId) {
-            cancelAnimationFrame(animationState.animationId);
-            animationState.animationId = null;
-          }
-          gsap.set(".slide_in-view__images .work-space--slide-item", {
-            pointerEvents: "none",
-          });
-          gsap.to(sliderRef.current, { x: 0, duration: 0.5, ease: "power2.out" });
-        },
-      });
-      ScrollTrigger.refresh();
-    };
-
-    const handleResize = () => {
-      setupScrollTrigger();
-      if (animationState.isMobile) {
-        gsap.set(sliderRef.current, { x: 0 }); // Ensures it's reset on resize if mobile
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    // Initial setup
-    setupScrollTrigger();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      if (animationState.animationId) {
-        cancelAnimationFrame(animationState.animationId);
-      }
-      if (mainScrollTrigger.current) {
-        mainScrollTrigger.current.kill(true);
-        mainScrollTrigger.current = null;
-      }
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
-
-  // Effect for handling lightbox open/close animations (initial and exit)
-  useEffect(() => {
-    if (lightboxOpen) {
-      setIsLightboxMounted(true);
-      document.body.style.overflow = "hidden";
-      document.body.classList.add("hide-cursor");
-
-      // Reset all images to hidden before showing the current one
-      // This is crucial for the first image entering the lightbox
-      lightboxImagesRefs.current.forEach((imgEl, idx) => {
-        gsap.set(imgEl, {
-          autoAlpha: 0,
-          zIndex: 1,
-          x: "0%",
-          scale: 1, // Ensure scale is reset for all images
-        });
-      });
-
-      gsap.to(lightboxRef.current, {
-        autoAlpha: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-
-      gsap.fromTo(
-        lightboxThumbnailElementsRefs.current,
-        { y: 20, autoAlpha: 0, scale: 0.8 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.3,
-          stagger: 0.05,
-          ease: "power2.out",
-          delay: 0.2,
-        }
-      );
-      // updateThumbnailsHighlight(currentImageIndex); // This will be called by useLayoutEffect
-    } else if (isLightboxMounted) {
-      const tl = gsap.timeline({
-        onComplete: () => {
-          setIsLightboxMounted(false);
-          document.body.style.overflow = "auto";
-          document.body.classList.remove("hide-cursor");
-          setCustomCursorVisible(false);
-
-          // Ensure all images are completely hidden after closing
-          lightboxImagesRefs.current.forEach((imgEl) => {
-            gsap.set(imgEl, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
-          });
-        },
-      });
-
-      if (lightboxThumbnailElementsRefs.current.length > 0) {
-        tl.to(
-          lightboxThumbnailElementsRefs.current,
-          {
-            y: 20,
-            autoAlpha: 0,
-            scale: 0.8,
-            duration: 0.3,
-            stagger: 0.03,
-            ease: "power2.in",
-          },
-          0
-        );
-      }
-
-      // Animate out the currently visible image when closing
-      if (lightboxImagesRefs.current[currentImageIndex]) {
-        tl.to(
-          lightboxImagesRefs.current[currentImageIndex],
-          { scale: 0.8, autoAlpha: 0, duration: 0.3, ease: "power2.in" },
-          "<0.1"
-        );
-      }
-
-      if (lightboxRef.current) {
-        tl.to(
-          lightboxRef.current,
-          { autoAlpha: 0, duration: 0.4, ease: "power2.in" },
-          "<0.1"
-        );
-      }
-    }
-  }, [lightboxOpen, isLightboxMounted]); // Removed currentImageIndex from dependencies
-
-  // New useEffect to handle image display and loading when currentImageIndex changes
-  // This useEffect will now manage ONLY the transition of the main image within the lightbox
-  useEffect(() => {
-    if (lightboxOpen && isLightboxMounted && !navigationInProgress.current) {
-      setIsImageLoading(true);
-
-      const newImageEl = lightboxImagesRefs.current[currentImageIndex];
-      if (newImageEl) {
-        const img = new Image();
-        img.src = WorkSpaceData[currentImageIndex].image_bg;
-        img.onload = () => {
-          setIsImageLoading(false);
-          // Ensure other images are hidden
-          lightboxImagesRefs.current.forEach((imgEl, idx) => {
-            if (idx !== currentImageIndex) {
-              gsap.set(imgEl, { autoAlpha: 0, zIndex: 1, x: "0%", scale: 1 });
-            }
-          });
-          // Animate in the current image
-          gsap.fromTo(
-            newImageEl,
-            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
-            {
-              scale: 1,
-              autoAlpha: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-              delay: 0.1,
-            }
-          );
-        };
-        img.onerror = () => {
-          console.error("Failed to load image:", img.src);
-          setIsImageLoading(false);
-        };
-      }
-    }
-  }, [currentImageIndex, lightboxOpen, isLightboxMounted]); // Dependencies for image display
+  const totalSlideCount = WorkSpaceData.length;
 
   const openLightbox = useCallback((index) => {
     setCurrentImageIndex(index);
@@ -547,6 +213,286 @@ function WorkSpace() {
     },
     [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight]
   );
+
+  // Initialize the slider's DOM structure (runs once)
+  const initializeSlides = useCallback(() => {
+    const track = sliderRef.current;
+    if (!track || animationState.current.isSliderInitialized) return;
+
+    track.innerHTML = ""; // Clear existing content
+    gsap.set(track, { x: 0 }); // Reset track position
+
+    const copiesMultiplier = 5; // Number of times to duplicate the entire dataset
+    const totalSlidesInTrack = totalSlideCount * copiesMultiplier;
+
+    for (let i = 0; i < totalSlidesInTrack; i++) {
+      const dataIndex = i % totalSlideCount;
+      const slide = document.createElement("div");
+      slide.className = "work-space--slide-item slide_in-view__image";
+      slide.dataset.index = dataIndex;
+      slide.innerHTML = `
+        <div class="item_bg">
+          <img src="${WorkSpaceData[dataIndex].image_bg}" alt="${
+        WorkSpaceData[dataIndex].name
+      }" decoding="async" loading="lazy" />
+        </div>
+      `;
+
+      slide.addEventListener("click", () => {
+        openLightbox(dataIndex);
+      });
+
+      track.appendChild(slide);
+    }
+
+    if (track.children.length > 0) {
+      const firstSlide = track.children[0];
+      const computedStyle = getComputedStyle(firstSlide);
+      const marginRight = parseFloat(computedStyle.marginRight);
+      animationState.current.slideWidth = firstSlide.offsetWidth + marginRight;
+      // Calculate the total width of one full sequence of original slides
+      animationState.current.sequenceWidth = totalSlideCount * animationState.current.slideWidth;
+    } else {
+      animationState.current.slideWidth = 0;
+      animationState.current.sequenceWidth = 0;
+    }
+
+    animationState.current.isSliderInitialized = true; // Mark as initialized
+  }, [totalSlideCount, openLightbox]);
+
+  // Setup ScrollTrigger and GSAP animations for the slider
+  const setupSliderAnimations = useCallback(() => {
+    const container = document.querySelector(
+      ".slide_in-view__container .slide_in-view__row"
+    );
+    const imagesContainer = sliderRef.current; // This is the .slide_in-view__images element
+
+    // Ensure elements are available and slider is initialized before setting up animations
+    if (!container || !imagesContainer || !animationState.current.isSliderInitialized) {
+      console.warn("Slider elements not ready for animation setup.");
+      return;
+    }
+
+    // Kill any existing main ScrollTrigger to prevent duplicates on re-renders
+    if (mainScrollTrigger.current) {
+      mainScrollTrigger.current.kill(true);
+      mainScrollTrigger.current = null;
+    }
+
+    // Ensure initial state for images before animation
+    gsap.set(imagesContainer.querySelectorAll(".work-space--slide-item"), {
+      opacity: 0,
+      x: "100%",
+      pointerEvents: "none", // Disable interaction until animated in
+    });
+
+    mainScrollTrigger.current = ScrollTrigger.create({
+      trigger: container,
+      start: "top 80%",
+      // No 'end' property, so it triggers once and the animation continues indefinitely
+      // markers: true, // Uncomment for debugging ScrollTrigger
+      onEnter: () => {
+        // Use a custom data attribute to ensure this block runs only once
+        if (imagesContainer.dataset.animationStarted === "true") return;
+        imagesContainer.dataset.animationStarted = "true";
+
+        const tl = gsap.timeline({
+          onComplete: () => {
+            // Re-enable pointer events after initial slide-in animation is complete
+            gsap.set(imagesContainer.querySelectorAll(".work-space--slide-item"), {
+              pointerEvents: "auto",
+            });
+          }
+        });
+
+        // Initial slide-in animation for individual images
+        tl.to(imagesContainer.querySelectorAll(".work-space--slide-item"), {
+          opacity: 1,
+          x: "0%",
+          duration: 1.6,
+          stagger: 0.1, // Stagger the animation for each image
+          ease: "power4.out",
+        });
+
+        // Start the continuous loop of the entire container after the initial slide-in
+        // The '<0.5' positions this tween to start 0.5 seconds before the end of the previous tween
+        tl.to(imagesContainer, {
+          x: -animationState.current.sequenceWidth, // Move by the width of one full sequence
+          ease: "none", // Linear ease for continuous motion
+          duration: 80, // Adjust duration for desired speed of the loop
+          repeat: -1, // Infinite loop
+          modifiers: {
+            // Use GSAP's wrap utility for seamless looping
+            x: gsap.utils.wrap(0, -animationState.current.sequenceWidth)
+          }
+        }, "<0.5");
+      },
+      // No onLeaveBack: The animation will continue to loop once triggered
+    });
+    ScrollTrigger.refresh(); // Refresh ScrollTrigger to ensure correct calculations
+  }, []); // Dependencies: none, as it relies on refs and initialized state
+
+  // Main Effect for component mount and unmount (initial setup and cleanup)
+  useEffect(() => {
+    // 1. Initialize the slider structure ONCE when the component mounts
+    initializeSlides();
+
+    // 2. Setup ScrollTrigger and GSAP animations for the slider
+    // This will be called after initializeSlides has potentially populated the DOM
+    setupSliderAnimations();
+
+    // 3. Handle resize events to refresh ScrollTrigger
+    const handleResize = () => {
+      // Re-calculate sequenceWidth if layout changes significantly on resize
+      const track = sliderRef.current;
+      if (track && track.children.length > 0) {
+        const firstSlide = track.children[0];
+        const computedStyle = getComputedStyle(firstSlide);
+        const marginRight = parseFloat(computedStyle.marginRight);
+        animationState.current.slideWidth = firstSlide.offsetWidth + marginRight;
+        animationState.current.sequenceWidth = totalSlideCount * animationState.current.slideWidth;
+      }
+      ScrollTrigger.refresh(); // Refresh ScrollTrigger to adjust to new layout
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      // Kill all GSAP animations and ScrollTriggers on unmount
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      // Also ensure any ongoing GSAP tweens on sliderRef.current are killed
+      gsap.killTweensOf(sliderRef.current);
+      // Reset the custom flag on unmount to allow re-triggering if component remounts
+      if (sliderRef.current) {
+        sliderRef.current.dataset.animationStarted = "false";
+      }
+    };
+  }, [initializeSlides, setupSliderAnimations, totalSlideCount]); // Dependencies for main effect
+
+  // Effect for handling lightbox open/close animations (initial and exit)
+  useEffect(() => {
+    if (lightboxOpen) {
+      setIsLightboxMounted(true);
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("hide-cursor");
+
+      // Reset all images to hidden before showing the current one
+      // This is crucial for the first image entering the lightbox
+      lightboxImagesRefs.current.forEach((imgEl, idx) => {
+        gsap.set(imgEl, {
+          autoAlpha: 0,
+          zIndex: 1,
+          x: "0%",
+          scale: 1, // Ensure scale is reset for all images
+        });
+      });
+
+      gsap.to(lightboxRef.current, {
+        autoAlpha: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+
+      gsap.fromTo(
+        lightboxThumbnailElementsRefs.current,
+        { y: 20, autoAlpha: 0, scale: 0.8 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          scale: 1,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "power2.out",
+          delay: 0.2,
+        }
+      );
+    } else if (isLightboxMounted) {
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsLightboxMounted(false);
+          document.body.style.overflow = "auto";
+          document.body.classList.remove("hide-cursor");
+          setCustomCursorVisible(false);
+
+          // Ensure all images are completely hidden after closing
+          lightboxImagesRefs.current.forEach((imgEl) => {
+            gsap.set(imgEl, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
+          });
+        },
+      });
+
+      if (lightboxThumbnailElementsRefs.current.length > 0) {
+        tl.to(
+          lightboxThumbnailElementsRefs.current,
+          {
+            y: 20,
+            autoAlpha: 0,
+            scale: 0.8,
+            duration: 0.3,
+            stagger: 0.03,
+            ease: "power2.in",
+          },
+          0
+        );
+      }
+
+      // Animate out the currently visible image when closing
+      if (lightboxImagesRefs.current[currentImageIndex]) {
+        tl.to(
+          lightboxImagesRefs.current[currentImageIndex],
+          { scale: 0.8, autoAlpha: 0, duration: 0.3, ease: "power2.in" },
+          "<0.1"
+        );
+      }
+
+      if (lightboxRef.current) {
+        tl.to(
+          lightboxRef.current,
+          { autoAlpha: 0, duration: 0.4, ease: "power2.in" },
+          "<0.1"
+        );
+      }
+    }
+  }, [lightboxOpen, isLightboxMounted, currentImageIndex]); // currentImageIndex is important here for exit animation
+
+  // New useEffect to handle image display and loading when currentImageIndex changes
+  // This useEffect will now manage ONLY the transition of the main image within the lightbox
+  useEffect(() => {
+    if (lightboxOpen && isLightboxMounted && !navigationInProgress.current) {
+      setIsImageLoading(true);
+
+      const newImageEl = lightboxImagesRefs.current[currentImageIndex];
+      if (newImageEl) {
+        const img = new Image();
+        img.src = WorkSpaceData[currentImageIndex].image_bg;
+        img.onload = () => {
+          setIsImageLoading(false);
+          // Ensure other images are hidden
+          lightboxImagesRefs.current.forEach((imgEl, idx) => {
+            if (idx !== currentImageIndex) {
+              gsap.set(imgEl, { autoAlpha: 0, zIndex: 1, x: "0%", scale: 1 });
+            }
+          });
+          // Animate in the current image
+          gsap.fromTo(
+            newImageEl,
+            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              delay: 0.1,
+            }
+          );
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", img.src);
+          setIsImageLoading(false);
+        };
+      }
+    }
+  }, [currentImageIndex, lightboxOpen, isLightboxMounted]); // Dependencies for image display
 
   useLayoutEffect(() => {
     if (lightboxOpen && isLightboxMounted) { // Ensure lightbox is open and mounted for thumbnail update
