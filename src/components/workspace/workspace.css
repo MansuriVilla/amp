@@ -11,8 +11,8 @@
 .lightbox-caption { color: #fff; text-align: center; margin-top: 15px; max-width: 80%; overflow-y: auto; transform: translateY(20px); opacity: 0; }
 .lightbox-caption h3 { margin: 0 0 5px 0; font-size: 1.8em; color: #333; }
 .lightbox-caption p { margin: 0; font-size: 1em; line-height: 1.5; color: #555; }
-.lightbox-close { position: absolute; top: 10px; right: 15px; font-size: 2.5em; color: #fff; background: none; border: none; cursor: pointer; padding: 5px 10px; z-index: 1001; line-height: 1; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
-.lightbox-close:hover { color: #ccc; }
+.lightbox-close { position: absolute; top: 10px; right: 15px; font-size: 2.5em; color: #fff; background: none; border: none; cursor: pointer; padding: 5px 10px; z-index: 99999999; line-height: 1; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.lightbox-close:hover { color: #000; }
 .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3em; color: #fff; background: none; border: none; cursor: pointer; padding: 10px; z-index: 1001; text-shadow: 0 0 10px rgba(0,0,0,0.8); }
 .lightbox-nav:hover { color: #ccc; }
 .lightbox-prev { left: 20px; }
@@ -29,12 +29,13 @@
 .custom-cursor.right { scale: 1.2; }
 .lightbox-nav { display: none; }
 @media (max-width: 768px) {
- .lightbox-nav { font-size: 2.5em; padding: 5px; }
-.lightbox-prev { left: 10px; }
-.lightbox-next { right: 10px; }
-.lightbox-close { font-size: 1.5em; top: 5px; right: 10px; }
-.lightbox-caption { font-size: 0.9em; max-width: 90%; }
-.lightbox-content{background-color:#ffffff25 ; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
-.work-space--slide-item{flex: 0 0 60vw;}
-.lightbox-image{object-fit: contain; padding: 0 12px;}
+    .lightbox-nav { font-size: 2.5em; padding: 5px; }
+    .lightbox-prev { left: 10px; }
+    .lightbox-next { right: 10px; }
+    .lightbox-close { font-size: 1.5em; top: 5px; right: 10px; }
+    .lightbox-caption { font-size: 0.9em; max-width: 90%; }
+    .lightbox-content{background-color:#ffffff25 ; backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); }
+    .work-space--slide-item{flex: 0 0 60vw;}
+    .lightbox-image{object-fit: contain; padding: 0 12px;}
+    .lightbox-thumbnails {  padding: 0 15px; bottom: 22vh; gap: 5px; }
  }

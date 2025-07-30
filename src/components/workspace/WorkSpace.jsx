@@ -16,9 +16,9 @@ function WorkSpace() {
   const sectionRef = useRef(null);
   const sliderRef = useRef(null);
   const mainScrollTrigger = useRef(null);
-  const hasInitiallyAnimated = useRef(false); // Add this line
+  const hasInitiallyAnimated = useRef(false);
+  const closeButtonRef = useRef(null); // New ref for close button
 
-  // ... (Lightbox and Custom Cursor states and refs remain the same)
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [isLightboxMounted, setIsLightboxMounted] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -56,7 +56,6 @@ function WorkSpace() {
     }
   }, []);
 
-  // Cleanup for CTA triggers (not directly related to slider, but kept)
   useEffect(() => {
     const ctaTriggers = [];
     return () => {
@@ -64,7 +63,6 @@ function WorkSpace() {
     };
   }, []);
 
-  // Define updateThumbnailsHighlight here
   const updateThumbnailsHighlight = useCallback((index) => {
     lightboxThumbnailElementsRefs.current.forEach((thumbnail, i) => {
       if (thumbnail) {
@@ -76,25 +74,20 @@ function WorkSpace() {
       }
     });
 
-    // Optional: Scroll the active thumbnail into view
     const activeThumbnail = lightboxThumbnailElementsRefs.current[index];
     if (activeThumbnail && lightboxThumbnailsRef.current) {
       const thumbnailsContainer = lightboxThumbnailsRef.current;
       const thumbnailRect = activeThumbnail.getBoundingClientRect();
       const containerRect = thumbnailsContainer.getBoundingClientRect();
 
-      // Check if thumbnail is out of view to the left
       if (thumbnailRect.left < containerRect.left) {
         thumbnailsContainer.scrollLeft += thumbnailRect.left - containerRect.left;
-      }
-      // Check if thumbnail is out of view to the right
-      else if (thumbnailRect.right > containerRect.right) {
+      } else if (thumbnailRect.right > containerRect.right) {
         thumbnailsContainer.scrollLeft += thumbnailRect.right - containerRect.right;
       }
     }
   }, []);
 
-  // Use a ref for animation state to persist across renders and avoid re-closures
   const animationState = useRef({
     currentX: 0,
     targetX: 0,
@@ -103,7 +96,7 @@ function WorkSpace() {
     isMobile: false,
     animationId: null,
     isAnimationActive: false,
-    isSliderInitialized: false, // NEW: Track if slider has been initialized
+    isSliderInitialized: false,
   });
 
   const config = {
@@ -112,7 +105,6 @@ function WorkSpace() {
   };
   const totalSlideCount = WorkSpaceData.length;
 
-  // Memoize these functions to avoid re-creation on every render
   const checkMobile = useCallback(() => {
     animationState.current.isMobile = window.innerWidth <= 768;
   }, []);
@@ -202,16 +194,8 @@ function WorkSpace() {
                 navigationInProgress.current = false;
               },
             })
-            .to(
-              oldImageEl,
-              { x: endXOld, duration: 0.6, ease: "power2.inOut" },
-              0
-            )
-            .to(
-              newImageEl,
-              { x: "0%", duration: 0.6, ease: "power2.inOut" },
-              0
-            );
+            .to(oldImageEl, { x: endXOld, duration: 0.6, ease: "power2.inOut" }, 0)
+            .to(newImageEl, { x: "0%", duration: 0.6, ease: "power2.inOut" }, 0);
         };
         img.onerror = () => {
           console.error("Failed to load image:", img.src);
@@ -228,20 +212,17 @@ function WorkSpace() {
     [currentImageIndex, directionFromCurrent, updateThumbnailsHighlight]
   );
 
-
-  // Initial setup for the slider (should only run once)
   const initializeSlides = useCallback(() => {
     const track = sliderRef.current;
-    if (!track || animationState.current.isSliderInitialized) return; // Prevent re-initialization
+    if (!track || animationState.current.isSliderInitialized) return;
 
     track.innerHTML = "";
     animationState.current.slides = [];
-    gsap.set(track, { x: 0 }); // Ensure track is reset
+    gsap.set(track, { x: 0 });
     cancelAnimationFrame(animationState.current.animationId);
     animationState.current.isAnimationActive = false;
 
-    checkMobile(); // Check mobile status
-
+    checkMobile();
     const copiesMultiplier = 5;
     const totalSlidesInTrack = totalSlideCount * copiesMultiplier;
 
@@ -275,17 +256,15 @@ function WorkSpace() {
       animationState.current.slideWidth = 0;
     }
 
-    // Set initial position for seamless looping
     const initialOffset =
       totalSlideCount * animationState.current.slideWidth * Math.floor(copiesMultiplier / 2);
     animationState.current.currentX = -initialOffset;
     animationState.current.targetX = -initialOffset;
 
-    // Apply initial transform immediately after setup
     track.style.transform = `translate3d(${animationState.current.currentX}px, 0, 0)`;
 
-    animationState.current.isSliderInitialized = true; // Mark as initialized
-  }, [totalSlideCount, checkMobile, openLightbox]); // Dependencies for useCallback
+    animationState.current.isSliderInitialized = true;
+  }, [totalSlideCount, checkMobile, openLightbox]);
 
   const updateSlidePositions = useCallback(() => {
     const track = sliderRef.current;
@@ -309,13 +288,10 @@ function WorkSpace() {
       animationState.current.targetX -= sequenceWidth;
     }
 
-    // Only apply transform if animation is active
     if (animationState.current.isAnimationActive) {
       track.style.transform = `translate3d(${animationState.current.currentX}px, 0, 0)`;
     }
-    // No else: if not active, let ScrollTrigger handle initial positioning or keep it at 0
   }, [totalSlideCount]);
-
 
   const updateParallax = useCallback(() => {
     if (!animationState.current.isAnimationActive) return;
@@ -340,7 +316,6 @@ function WorkSpace() {
     });
   }, []);
 
-  // Main animation loop
   const animate = useCallback(() => {
     if (!animationState.current.isAnimationActive) {
       cancelAnimationFrame(animationState.current.animationId);
@@ -363,23 +338,21 @@ function WorkSpace() {
       console.warn("Slide-in view elements not found");
       return;
     }
-  
+
     if (mainScrollTrigger.current) {
       mainScrollTrigger.current.kill(true);
       mainScrollTrigger.current = null;
     }
-  
+
     mainScrollTrigger.current = ScrollTrigger.create({
       trigger: container,
       start: "top 80%",
       onEnter: () => {
-        // Start or resume the continuous loop immediately
         if (!animationState.current.isAnimationActive) {
           animationState.current.isAnimationActive = true;
           animate();
         }
-  
-        // Run initial animation only the first time
+
         if (!hasInitiallyAnimated.current) {
           gsap.fromTo(
             ".slide_in-view__images .work-space--slide-item",
@@ -396,21 +369,19 @@ function WorkSpace() {
               onComplete: () => {
                 gsap.set(".slide_in-view__images .work-space--slide-item", {
                   pointerEvents: "auto",
-                  x: "0%", // Reset individual slide transforms
+                  x: "0%",
                 });
                 hasInitiallyAnimated.current = true;
               },
             }
           );
         } else {
-          // Ensure pointer events are enabled on subsequent enters
           gsap.set(".slide_in-view__images .work-space--slide-item", {
             pointerEvents: "auto",
           });
         }
       },
       onLeaveBack: () => {
-        // Stop the animation without resetting position
         animationState.current.isAnimationActive = false;
         cancelAnimationFrame(animationState.current.animationId);
         animationState.current.animationId = null;
@@ -422,19 +393,13 @@ function WorkSpace() {
     ScrollTrigger.refresh();
   }, [animate]);
 
-  // Main Effect for component mount and unmount (Initial setup and cleanup)
   useEffect(() => {
-    // 1. Initialize the slider structure ONCE when the component mounts
     initializeSlides();
-
-    // 2. Setup ScrollTrigger, which will now only *control* the animation loop
     setupScrollTrigger();
 
-    // 3. Handle resize events to refresh ScrollTrigger and check mobile
     const handleResize = () => {
       checkMobile();
       ScrollTrigger.refresh();
-      // On mobile, if we decided to stop the animation, ensure it's visually reset
       if (animationState.current.isMobile) {
         gsap.set(sliderRef.current, { x: 0 });
       }
@@ -443,7 +408,6 @@ function WorkSpace() {
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      // Ensure all GSAP animations and ScrollTriggers are killed on unmount
       if (animationState.current.animationId) {
         cancelAnimationFrame(animationState.current.animationId);
       }
@@ -453,10 +417,8 @@ function WorkSpace() {
       }
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [initializeSlides, setupScrollTrigger, checkMobile]); // These are stable useCallback functions
+  }, [initializeSlides, setupScrollTrigger, checkMobile]);
 
-  // ... (Lightbox open/close and image loading effects remain largely the same)
-  // Effect for handling lightbox open/close animations (initial and exit)
   useEffect(() => {
     if (lightboxOpen) {
       setIsLightboxMounted(true);
@@ -491,6 +453,31 @@ function WorkSpace() {
           delay: 0.2,
         }
       );
+
+      const initialImageEl = lightboxImagesRefs.current[currentImageIndex];
+      if (initialImageEl) {
+        setIsImageLoading(true);
+        const img = new Image();
+        img.src = WorkSpaceData[currentImageIndex].image_bg;
+        img.onload = () => {
+          setIsImageLoading(false);
+          gsap.fromTo(
+            initialImageEl,
+            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
+            {
+              scale: 1,
+              autoAlpha: 1,
+              duration: 0.5,
+              ease: "back.out(1.7)",
+              delay: 0.1,
+            }
+          );
+        };
+        img.onerror = () => {
+          console.error("Failed to load image:", img.src);
+          setIsImageLoading(false);
+        };
+      }
     } else if (isLightboxMounted) {
       const tl = gsap.timeline({
         onComplete: () => {
@@ -536,43 +523,7 @@ function WorkSpace() {
         );
       }
     }
-  }, [lightboxOpen, isLightboxMounted, currentImageIndex]); // currentImageIndex is important here for exit animation
-
-  // New useEffect to handle image display and loading when currentImageIndex changes
-  useEffect(() => {
-    if (lightboxOpen && isLightboxMounted && !navigationInProgress.current) {
-      setIsImageLoading(true);
-
-      const newImageEl = lightboxImagesRefs.current[currentImageIndex];
-      if (newImageEl) {
-        const img = new Image();
-        img.src = WorkSpaceData[currentImageIndex].image_bg;
-        img.onload = () => {
-          setIsImageLoading(false);
-          lightboxImagesRefs.current.forEach((imgEl, idx) => {
-            if (idx !== currentImageIndex) {
-              gsap.set(imgEl, { autoAlpha: 0, zIndex: 1, x: "0%", scale: 1 });
-            }
-          });
-          gsap.fromTo(
-            newImageEl,
-            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
-            {
-              scale: 1,
-              autoAlpha: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-              delay: 0.1,
-            }
-          );
-        };
-        img.onerror = () => {
-          console.error("Failed to load image:", img.src);
-          setIsImageLoading(false);
-        };
-      }
-    }
-  }, [currentImageIndex, lightboxOpen, isLightboxMounted]);
+  }, [lightboxOpen, isLightboxMounted, currentImageIndex]);
 
   useLayoutEffect(() => {
     if (lightboxOpen && isLightboxMounted) {
@@ -602,13 +553,15 @@ function WorkSpace() {
       if (
         !isLightboxMounted ||
         !lightboxRef.current ||
-        !customCursorRef.current
+        !customCursorRef.current ||
+        !closeButtonRef.current
       ) {
         setCustomCursorVisible(false);
         return;
       }
 
       const lightboxRect = lightboxRef.current.getBoundingClientRect();
+      const closeButtonRect = closeButtonRef.current.getBoundingClientRect();
       const mouseX = e.clientX;
       const mouseY = e.clientY;
 
@@ -618,7 +571,13 @@ function WorkSpace() {
         mouseY >= lightboxRect.top &&
         mouseY <= lightboxRect.bottom;
 
-      if (!isWithinLightboxBounds) {
+      const isOverCloseButton =
+        mouseX >= closeButtonRect.left &&
+        mouseX <= closeButtonRect.right &&
+        mouseY >= closeButtonRect.top &&
+        mouseY <= closeButtonRect.bottom;
+
+      if (!isWithinLightboxBounds || isOverCloseButton) {
         setCustomCursorVisible(false);
         return;
       }
@@ -735,7 +694,7 @@ function WorkSpace() {
             ref={lightboxContentRef}
             onClick={(e) => e.stopPropagation()}
           >
-            <button className="lightbox-close" onClick={closeLightbox}>
+            <button className="lightbox-close" ref={closeButtonRef} onClick={closeLightbox}>
               &times;
             </button>
 
