@@ -288,7 +288,7 @@ function WorkSpace() {
     const handleResize = () => {
       setupScrollTrigger();
       if (animationState.isMobile) {
-        gsap.set(sliderRef.current, { x: 0 }); 
+        gsap.set(sliderRef.current, { x: 0 }); // Ensures it's reset on resize if mobile
       }
     };
     window.addEventListener("resize", handleResize);
@@ -309,12 +309,15 @@ function WorkSpace() {
     };
   }, []);
 
+  // Effect for handling lightbox open/close animations (initial and exit)
   useEffect(() => {
     if (lightboxOpen) {
       setIsLightboxMounted(true);
       document.body.style.overflow = "hidden";
       document.body.classList.add("hide-cursor");
 
+      // Reset all images to hidden before showing the current one
+      // This is crucial for the first image entering the lightbox
       lightboxImagesRefs.current.forEach((imgEl, idx) => {
         gsap.set(imgEl, {
           autoAlpha: 0,

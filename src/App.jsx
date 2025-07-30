@@ -69,7 +69,7 @@ function App() {
               trigger: revealSection,
               start: "top 50%",
               end: "+=" + revealSection.offsetHeight * 3.5,
-              // markers:true,
+              markers:true,
               toggleActions: "play reverse play reverse",
             },
           }
