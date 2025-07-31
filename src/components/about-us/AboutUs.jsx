@@ -12,6 +12,9 @@ function AboutUs() {
               We’re here to build real stuff that works, looks great, and makes
               sense.
             </h2>
+
+
+            <span className="asas"></span>
           </div>
           <div className="about_us_content_bottom reveal-text">
             <h2>
