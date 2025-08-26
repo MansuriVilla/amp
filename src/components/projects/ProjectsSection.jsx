@@ -23,13 +23,10 @@ function ProjectsSection() {
       const slider = sliderRef.current;
       const projectSectionBottom = projectSectionBottomRef.current;
 
-      // Kill existing main ScrollTrigger if it exists
       if (mainScrollTrigger.current) {
-        mainScrollTrigger.current.kill(true); // Kills tween and ScrollTrigger
+        mainScrollTrigger.current.kill(true);
         mainScrollTrigger.current = null;
       }
-      // Removed: ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-      // We no longer kill all ScrollTriggers, only this component's
 
       // Check if screen width is 768px or less
       if (window.innerWidth <= 768) {
@@ -37,17 +34,16 @@ function ProjectsSection() {
           gsap.set(slider, { x: 0 });
         }
         if (projectSectionBottom) {
-          ScrollTrigger.refresh(); // Refresh to remove pinning effects
+          ScrollTrigger.refresh();
         }
         ctaRefs.current.forEach((cta) => {
           if (cta) {
-            gsap.set(cta, { y: 0, opacity: 1 }); // Ensure CTAs are visible
+            gsap.set(cta, { y: 0, opacity: 1 });
           }
         });
-        return; // Exit if on mobile
+        return;
       }
 
-      // Setup animations for larger screens
       if (slider && projectSectionBottom) {
         const totalContentWidth = slider.scrollWidth;
         const visibleContainerWidth = slider.clientWidth;
@@ -89,14 +85,13 @@ function ProjectsSection() {
     };
   }, []);
 
-  // CTA Button Animations
   useEffect(() => {
     if (!mainScrollTrigger.current) {
       return;
     }
 
     const slideItems = document.querySelectorAll(".slide-item");
-    const ctaScrollTriggers = []; // Array to store CTA ScrollTriggers
+    const ctaScrollTriggers = [];
 
     slideItems.forEach((slideItem) => {
       const cta = slideItem.querySelector(".project_cta");
@@ -118,17 +113,15 @@ function ProjectsSection() {
           },
         });
 
-        ctaScrollTriggers.push(tween.scrollTrigger); // Store the ScrollTrigger instance
+        ctaScrollTriggers.push(tween.scrollTrigger);
       }
     });
 
-    // Cleanup only this component's CTA ScrollTriggers
     return () => {
       ctaScrollTriggers.forEach((st) => st.kill());
     };
   }, [mainScrollTrigger.current]);
 
-  // Overlay animation effect (unchanged)
   useEffect(() => {
     if (isOverlayVisible && overlayRef.current) {
       gsap.fromTo(
@@ -173,8 +166,6 @@ function ProjectsSection() {
   const setCtaRef = (el, index) => {
     ctaRefs.current[index] = el;
   };
-
-  // JSX remains unchanged
   return (
     <>
       <section className="projects_section" ref={projectSectionBottomRef}>
@@ -263,8 +254,16 @@ function ProjectsSection() {
                         {overlayData.project_link_linkText}{" "}
                       </span>{" "}
                       <span className="site_flex">
-                        <img className="icon-default" src={linkIcon} alt="Email Link Icon" />
-                        <img className="icon-hover" src={linkIcon} alt="Email Link Icon" />
+                        <img
+                          className="icon-default"
+                          src={linkIcon}
+                          alt="Email Link Icon"
+                        />
+                        <img
+                          className="icon-hover"
+                          src={linkIcon}
+                          alt="Email Link Icon"
+                        />
                       </span>
                     </a>
                   </div>
