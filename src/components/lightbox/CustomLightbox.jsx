@@ -105,8 +105,13 @@ const CustomLightbox = ({
     const newImageEl = lightboxImagesRefs.current[newIndex];
 
     if (oldImageEl && newImageEl) {
+      const oldImg = oldImageEl.querySelector("img");
+      const newImg = newImageEl.querySelector("img");
+
       const startXNew = directionFromCurrent(currentImageIndex, newIndex, totalCount);
       const endXOld = startXNew === "100%" ? "-100%" : "100%";
+      const parallaxStart = startXNew === "100%" ? "-40%" : "40%";
+      const parallaxEnd = startXNew === "100%" ? "40%" : "-40%";
 
       // Preload image
       const img = new Image();
@@ -116,19 +121,24 @@ const CustomLightbox = ({
         setIsImageLoading(false);
 
         gsap.set(newImageEl, { x: startXNew, autoAlpha: 1, zIndex: 10, scale: 1 });
+        gsap.set(newImg, { x: parallaxStart });
         gsap.set(oldImageEl, { autoAlpha: 1, zIndex: 5, scale: 1 });
 
         gsap.timeline({
           onComplete: () => {
             gsap.set(oldImageEl, { autoAlpha: 0, x: "0%", zIndex: 1 });
+            gsap.set(oldImg, { x: "0%" });
             gsap.set(newImageEl, { autoAlpha: 1, x: "0%", zIndex: 10 });
+            gsap.set(newImg, { x: "0%" });
             onNavigate(newIndex);
             updateThumbnailsHighlight(newIndex);
             navigationInProgress.current = false;
           },
         })
-        .to(oldImageEl, { x: endXOld, duration: 0.6, ease: "power2.inOut" }, 0)
-        .to(newImageEl, { x: "0%", duration: 0.6, ease: "power2.inOut" }, 0);
+        .to(oldImageEl, { x: endXOld, duration: 0.8, ease: "power2.inOut" }, 0)
+        .to(oldImg, { x: parallaxEnd, duration: 0.8, ease: "power2.inOut" }, 0)
+        .to(newImageEl, { x: "0%", duration: 0.8, ease: "power2.inOut" }, 0)
+        .to(newImg, { x: "0%", duration: 0.8, ease: "power2.inOut" }, 0);
       };
 
       img.onerror = () => {
@@ -146,13 +156,14 @@ const CustomLightbox = ({
 
   // Custom cursor handlers
   const handleMouseMove = useCallback((e) => {
-    if (!isLightboxMounted || !lightboxRef.current || !customCursorRef.current || !closeButtonRef.current) {
+    if (!isLightboxMounted || !lightboxRef.current || !customCursorRef.current || !closeButtonRef.current || !lightboxThumbnailsRef.current) {
       setCustomCursorVisible(false);
       return;
     }
 
     const lightboxRect = lightboxRef.current.getBoundingClientRect();
     const closeButtonRect = closeButtonRef.current.getBoundingClientRect();
+    const thumbnailsRect = lightboxThumbnailsRef.current.getBoundingClientRect();
     const mouseX = e.clientX;
     const mouseY = e.clientY;
 
@@ -168,7 +179,13 @@ const CustomLightbox = ({
       mouseY >= closeButtonRect.top &&
       mouseY <= closeButtonRect.bottom;
 
-    if (!isWithinLightboxBounds || isOverCloseButton) {
+    const isOverThumbnails =
+      mouseX >= thumbnailsRect.left &&
+      mouseX <= thumbnailsRect.right &&
+      mouseY >= thumbnailsRect.top &&
+      mouseY <= thumbnailsRect.bottom;
+
+    if (!isWithinLightboxBounds || isOverCloseButton || isOverThumbnails) {
       setCustomCursorVisible(false);
       return;
     }
@@ -306,6 +323,7 @@ const CustomLightbox = ({
       const initialImageEl = lightboxImagesRefs.current[currentImageIndex];
       if (initialImageEl) {
         setIsImageLoading(true);
+        const initialImg = initialImageEl.querySelector("img");
         const img = new Image();
         img.src = images[currentImageIndex].image_bg;
         
@@ -313,23 +331,31 @@ const CustomLightbox = ({
           setIsImageLoading(false);
           
           if (!hasOpenedRef.current) {
+            gsap.set(initialImg, { scale: 1.6, x: "0%" });
             gsap.fromTo(
               initialImageEl,
               { scale: 0.8, autoAlpha: 0, zIndex: 10 },
               {
                 scale: 1,
                 autoAlpha: 1,
-                duration: 0.5,
-                ease: "back.out(1.7)",
+                duration: 0.8,
+                ease: "power3.out",
                 delay: 0.1,
-                onComplete: () => {
-                  hasOpenedRef.current = true;
-                }
               }
             );
+            gsap.to(initialImg, {
+              scale: 1.2,
+              duration: 1.2,
+              ease: "power2.out",
+              delay: 0.1,
+              onComplete: () => {
+                hasOpenedRef.current = true;
+              }
+            });
           } else {
             // If already opened, just ensure it's visible without the opening animation
             gsap.set(initialImageEl, { autoAlpha: 1, zIndex: 10, scale: 1 });
+            gsap.set(initialImg, { scale: 1.2, x: "0%" });
           }
         };
         
@@ -349,8 +375,10 @@ const CustomLightbox = ({
           setCustomCursorVisible(false);
 
           // Reset all images
-          lightboxImagesRefs.current.forEach((imgEl) => {
-            gsap.set(imgEl, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
+          lightboxImagesRefs.current.forEach((el) => {
+            const imgEl = el.querySelector("img");
+            gsap.set(el, { autoAlpha: 0, x: "0%", zIndex: 1, scale: 1 });
+            gsap.set(imgEl, { x: "0%", scale: 1.2 });
           });
         },
       });
@@ -426,25 +454,36 @@ const CustomLightbox = ({
           )}
 
           {images.map((data, index) => (
-            <img
+            <div
               key={index}
               ref={addLightboxImageRef}
               data-index={index}
-              src={data.image_bg}
-              alt={`Gallery Image ${index + 1}`}
-              className="lightbox-image"
+              className="lightbox-image-wrapper"
               style={{
                 position: "absolute",
                 top: 0,
                 left: 0,
                 width: "100%",
                 height: "100%",
-                transform: "translateX(0%)",
+                overflow: "hidden",
                 visibility: "hidden",
                 opacity: 0,
                 zIndex: 1,
               }}
-            />
+            >
+              <img
+                src={data.image_bg}
+                alt={`Gallery Image ${index + 1}`}
+                className="lightbox-image"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  transform: "scale(1.2)",
+                  willChange: "transform",
+                }}
+              />
+            </div>
           ))}
 
           <div 
