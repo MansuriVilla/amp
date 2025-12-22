@@ -22,6 +22,7 @@ const CustomLightbox = ({
   const closeButtonRef = useRef(null);
   const customCursorRef = useRef(null);
   const navigationInProgress = useRef(false);
+  const hasOpenedRef = useRef(false);
   const lightboxImagesRefs = useRef([]);
   const lightboxThumbnailElementsRefs = useRef([]);
 
@@ -278,26 +279,28 @@ const CustomLightbox = ({
       });
 
       // Animate lightbox in
-      gsap.to(lightboxRef.current, {
-        autoAlpha: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-
-      // Animate thumbnails in
-      gsap.fromTo(
-        lightboxThumbnailElementsRefs.current,
-        { y: 20, autoAlpha: 0, scale: 0.8 },
-        {
-          y: 0,
+      if (!hasOpenedRef.current) {
+        gsap.to(lightboxRef.current, {
           autoAlpha: 1,
-          scale: 1,
-          duration: 0.3,
-          stagger: 0.05,
+          duration: 0.5,
           ease: "power2.out",
-          delay: 0.2,
-        }
-      );
+        });
+
+        // Animate thumbnails in
+        gsap.fromTo(
+          lightboxThumbnailElementsRefs.current,
+          { y: 20, autoAlpha: 0, scale: 0.8 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            scale: 1,
+            duration: 0.3,
+            stagger: 0.05,
+            ease: "power2.out",
+            delay: 0.2,
+          }
+        );
+      }
 
       // Load and animate initial image
       const initialImageEl = lightboxImagesRefs.current[currentImageIndex];
@@ -308,17 +311,26 @@ const CustomLightbox = ({
         
         img.onload = () => {
           setIsImageLoading(false);
-          gsap.fromTo(
-            initialImageEl,
-            { scale: 0.8, autoAlpha: 0, zIndex: 10 },
-            {
-              scale: 1,
-              autoAlpha: 1,
-              duration: 0.5,
-              ease: "back.out(1.7)",
-              delay: 0.1,
-            }
-          );
+          
+          if (!hasOpenedRef.current) {
+            gsap.fromTo(
+              initialImageEl,
+              { scale: 0.8, autoAlpha: 0, zIndex: 10 },
+              {
+                scale: 1,
+                autoAlpha: 1,
+                duration: 0.5,
+                ease: "back.out(1.7)",
+                delay: 0.1,
+                onComplete: () => {
+                  hasOpenedRef.current = true;
+                }
+              }
+            );
+          } else {
+            // If already opened, just ensure it's visible without the opening animation
+            gsap.set(initialImageEl, { autoAlpha: 1, zIndex: 10, scale: 1 });
+          }
         };
         
         img.onerror = () => {
@@ -331,6 +343,7 @@ const CustomLightbox = ({
       const tl = gsap.timeline({
         onComplete: () => {
           setIsLightboxMounted(false);
+          hasOpenedRef.current = false;
           document.body.style.overflow = "auto";
           document.body.classList.remove("hide-cursor");
           setCustomCursorVisible(false);
@@ -401,6 +414,7 @@ const CustomLightbox = ({
             className="lightbox-close" 
             ref={closeButtonRef} 
             onClick={onClose}
+            onMouseDown={(e) => e.stopPropagation()}
           >
             &times;
           </button>
@@ -433,7 +447,11 @@ const CustomLightbox = ({
             />
           ))}
 
-          <div className="lightbox-thumbnails" ref={lightboxThumbnailsRef}>
+          <div 
+            className="lightbox-thumbnails" 
+            ref={lightboxThumbnailsRef}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
             {images.map((data, index) => (
               <div
                 key={index}
